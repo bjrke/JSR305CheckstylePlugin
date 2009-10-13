@@ -12,7 +12,10 @@
                 <description>Packages excluded from checking.</description>
             </property-metadata>
             <property-metadata name="allowedAnnotations" datatype="String">
-                <description>Define allowed Annotations, default is "Nullable", "CheckForNull", "Nonnull".</description>
+                <description>Define allowed Annotations, default is "Nonnull,Nullable,SuppressWarnings".</description>
+            </property-metadata>
+            <property-metadata name="allowedMethodAnnotations" datatype="String">
+                <description>Define allowed Annotations, default is "CheckReturnValue,CheckForNull,Override".</description>
             </property-metadata>
         </rule-metadata>
     </rule-group-metadata>

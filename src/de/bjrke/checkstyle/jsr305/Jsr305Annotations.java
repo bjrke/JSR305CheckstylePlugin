@@ -43,8 +43,8 @@ public class Jsr305Annotations extends Check {
 
     private String[] _packages = new String[0];
     private String[] _excludePackages = new String[0];
-    private String[] _allowedAnnotations = { "Nullable", "CheckForNull", "Nonnull" };
-    private String[] _allowedMethodAnnotations = { "CheckForNull", "Nonnull", "CheckReturnValue" };
+    private String[] _allowedAnnotations = { "Nonnull", "Nullable", "SuppressWarnings" };
+    private String[] _allowedMethodAnnotations = { "CheckReturnValue", "CheckForNull", "Override" };
 
     private boolean _checkAnnotation;
 
@@ -60,8 +60,8 @@ public class Jsr305Annotations extends Check {
         _allowedAnnotations = new HashSet<String>( Arrays.asList( allowedAnnotations ) ).toArray( _allowedAnnotations );
     }
 
-    public void setAllowedMethodAnnotations( final String[] allowedAnnotations ) {
-        _allowedMethodAnnotations = new HashSet<String>( Arrays.asList( allowedAnnotations ) ).toArray( _allowedMethodAnnotations );
+    public void setAllowedMethodAnnotations( final String[] allowedMethodAnnotations ) {
+        _allowedMethodAnnotations = new HashSet<String>( Arrays.asList( allowedMethodAnnotations ) ).toArray( _allowedMethodAnnotations );
     }
 
     @Override

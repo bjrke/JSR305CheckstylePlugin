@@ -3,7 +3,7 @@ to develop just import project to eclipse with default settings
 to build the jar type
     ant
 
-to use copy JSR305Checkstyle-x.x.x.jar into your eclipse plugins directory or add it as compile lib to the classpath of the checkstyle task.
+to use copy JSR305Checkstyle-x.x.x.jar into your eclipse dropins directory or add it as compile lib to the classpath of the checkstyle task.
 
 add this to your checkstyle.xml
     <module name="Jsr305Annotations">
