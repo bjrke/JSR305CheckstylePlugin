@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import antlr.collections.AST;
 
@@ -49,19 +50,24 @@ public class Jsr305Annotations extends Check {
     private boolean _checkAnnotation;
 
     public void setPackages( final String[] packageNames ) {
-        _packages = new HashSet<String>( Arrays.asList( packageNames ) ).toArray( _packages );
+        _packages = transformToUnique( packageNames );
     }
 
     public void setExcludePackages( final String[] packageNames ) {
-        _excludePackages = new HashSet<String>( Arrays.asList( packageNames ) ).toArray( _excludePackages );
+        _excludePackages = transformToUnique( packageNames );
     }
 
     public void setAllowedAnnotations( final String[] allowedAnnotations ) {
-        _allowedAnnotations = new HashSet<String>( Arrays.asList( allowedAnnotations ) ).toArray( _allowedAnnotations );
+        _allowedAnnotations = transformToUnique( allowedAnnotations );
     }
 
     public void setAllowedMethodAnnotations( final String[] allowedMethodAnnotations ) {
-        _allowedMethodAnnotations = new HashSet<String>( Arrays.asList( allowedMethodAnnotations ) ).toArray( _allowedMethodAnnotations );
+        _allowedMethodAnnotations = transformToUnique( allowedMethodAnnotations );
+    }
+
+    private static String[] transformToUnique( final String[] input ) {
+        final Set<String> inputSet = new HashSet<String>( Arrays.asList( input ) );
+        return inputSet.toArray( new String[ inputSet.size() ] );
     }
 
     @Override
@@ -71,12 +77,17 @@ public class Jsr305Annotations extends Check {
 
     @Override
     public void visitToken( final DetailAST aast ) {
-        if ( aast.getType() == TokenTypes.PACKAGE_DEF ) {
-            final DetailAST nameAST = aast.getLastChild().getPreviousSibling();
-            final FullIdent full = FullIdent.createFullIdent( nameAST );
-            _checkAnnotation = isConfiguredPackage( full.getText() );
-        } else if ( _checkAnnotation ) {
-            handleDefinition( aast );
+        try {
+            if ( aast.getType() == TokenTypes.PACKAGE_DEF ) {
+                final DetailAST nameAST = aast.getLastChild().getPreviousSibling();
+                final FullIdent full = FullIdent.createFullIdent( nameAST );
+                _checkAnnotation = isConfiguredPackage( full.getText() );
+            } else if ( _checkAnnotation ) {
+                handleDefinition( aast );
+            }
+        } catch (final RuntimeException e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 
