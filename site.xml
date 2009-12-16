@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="JSR305CheckstylePlugin" url="http://cloud.github.com/downloads/bjrke/JSR305CheckstylePlugin">
+      This the JSR305CheckstylePlugin
+   </description>
+   <feature url="features/JSR305CheckstylePlugin-0.3.4.jar" id="JSR305CheckstylePlugin" version="0.3.4">
+      <category name="JSR305Checkstyle"/>
+   </feature>
+   <archive path="JSR305CheckstylePlugin-0.3.4.jar" url="http://cloud.github.com/downloads/bjrke/JSR305CheckstylePlugin/JSR305CheckstylePlugin-0.3.4.jar" />
+   <category-def name="JSR305Checkstyle" label="JSR305Checkstyle">
+      <description>
+         lalala
+      </description>
+   </category-def>
+</site>
