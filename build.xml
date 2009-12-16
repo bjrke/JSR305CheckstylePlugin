@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project name="JSR305CheckstylePlugin" default="jar" basedir=".">
 
-    <property name="version" value="0.3.3" />
+    <property name="version" value="0.3.4" />
     <property name="src" value="src" />
     <property name="build" value="build" />
     <property name="classes" value="${build}/classes" />
@@ -15,6 +15,8 @@
 
     <fileset id="checkstyle_metadata" dir="${src}">
         <include name="checkstyle_packages.xml" />
+        <include name="META-INF/MANIFEST.MF" />
+        <!--<include name="fragment.xml" />-->
         <include name="de/bjrke/checkstyle/jsr305/checkstyle-metadata.xml" />
     </fileset>
 
@@ -33,13 +35,16 @@
     </target>
 
     <target name="metadata">
-        <copy todir="${classes}">
+        <copy todir="${classes}" overwrite="true">
             <fileset refid="checkstyle_metadata" />
+            <filterset>
+                <filter token="VERSION" value="${version}" />
+            </filterset>
         </copy>
     </target>
 
     <target name="jar" depends="compile, metadata" description="make jar">
-        <jar jarfile="${build}/${pkgbase}.jar" manifest="${src}/MANIFEST.MF">
+        <jar jarfile="${build}/${pkgbase}.jar" manifest="${classes}/META-INF/MANIFEST.MF">
             <fileset dir="${classes}">
                 <include name="**/*.class"/>
                 <include name="**/*.xml"/>
