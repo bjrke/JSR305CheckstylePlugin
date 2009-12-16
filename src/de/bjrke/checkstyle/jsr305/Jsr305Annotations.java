@@ -106,7 +106,6 @@ public class Jsr305Annotations extends Check {
     }
 
     private void handleDefinition( final DetailAST aast ) {
-
         // do not check primitives
         final int type = aast.getType();
         if ( isPrimitiveType( aast.findFirstToken( TokenTypes.TYPE ) ) ) {
