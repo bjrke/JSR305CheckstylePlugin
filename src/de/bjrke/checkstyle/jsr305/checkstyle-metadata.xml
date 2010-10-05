@@ -15,7 +15,7 @@
                 <description>Define allowed Annotations, default is "Nonnull,Nullable,SuppressWarnings".</description>
             </property-metadata>
             <property-metadata name="allowedMethodAnnotations" datatype="String">
-                <description>Define allowed Annotations, default is "CheckReturnValue,CheckForNull,Override".</description>
+                <description>Define allowed Annotations, default is "Nonnull,CheckForNull,Override".</description>
             </property-metadata>
         </rule-metadata>
     </rule-group-metadata>

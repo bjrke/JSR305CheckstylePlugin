@@ -5,7 +5,7 @@
  * Copyright (C) 2008 Marcus Thiesen (initial version)
  * Copyright (C) 2008-2009 Jan Burkhardt (maintainer)
  *
- * thanks to Mattias Nissler, Thorsten Ehlers, Fabian Löwner for contributions
+ * thanks to Mattias Nissler, Thorsten Ehlers, Fabian Loewner for contributions
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,7 +45,7 @@ public class Jsr305Annotations extends Check {
     private String[] _packages = new String[0];
     private String[] _excludePackages = new String[0];
     private String[] _allowedAnnotations = { "Nonnull", "Nullable", "SuppressWarnings" };
-    private String[] _allowedMethodAnnotations = { "CheckReturnValue", "CheckForNull", "Override" };
+    private String[] _allowedMethodAnnotations = { "Nonnull", "CheckForNull", "Override" };
 
     private boolean _checkAnnotation;
 
