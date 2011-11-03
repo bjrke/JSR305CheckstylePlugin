@@ -67,12 +67,12 @@ public class Jsr305Annotations extends Check {
 
     private static String[] transformToUnique( final String[] input ) {
         final Set<String> inputSet = new HashSet<String>( Arrays.asList( input ) );
-        return inputSet.toArray( new String[ inputSet.size() ] );
+        return inputSet.toArray( new String[inputSet.size()] );
     }
 
     @Override
     public int[] getDefaultTokens() {
-        return  DEFAULT_MODIFIERS;
+        return DEFAULT_MODIFIERS;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class Jsr305Annotations extends Check {
             } else if ( _checkAnnotation ) {
                 handleDefinition( aast );
             }
-        } catch (final RuntimeException e) {
+        } catch ( final RuntimeException e ) {
             e.printStackTrace();
             throw e;
         }
@@ -118,7 +118,9 @@ public class Jsr305Annotations extends Check {
         }
 
         // search modifiers
-        final String[] allowed = type == TokenTypes.METHOD_DEF ? _allowedMethodAnnotations : _allowedAnnotations;
+        final String[] allowed = type == TokenTypes.METHOD_DEF
+            ? _allowedMethodAnnotations
+            : _allowedAnnotations;
         final DetailAST modifiers = aast.findFirstToken( TokenTypes.MODIFIERS );
         if ( modifiers != null ) {
             for ( final DetailAST annotation : findAnnotations( modifiers ) ) {
@@ -128,9 +130,9 @@ public class Jsr305Annotations extends Check {
             }
         }
 
-        final StringBuilder sb = new StringBuilder( "No Annotations for " )
-            .append( type == TokenTypes.PARAMETER_DEF ? "parameter definition" : "method definition (return value)" )
-            .append( " found, expected one of @" );
+        final StringBuilder sb = new StringBuilder( "No Annotations for " ).append( type == TokenTypes.PARAMETER_DEF
+            ? "parameter definition"
+            : "method definition (return value)" ).append( " found, expected one of @" );
 
         String comma = "";
         for ( final String annotation : allowed ) {
@@ -160,9 +162,8 @@ public class Jsr305Annotations extends Check {
             case TokenTypes.LITERAL_DOUBLE:
             case TokenTypes.LITERAL_FLOAT:
                 return true;
-            default:
-                return false;
         }
+        return false;
     }
 
     private List<DetailAST> findAnnotations( final DetailAST modifiers ) {
