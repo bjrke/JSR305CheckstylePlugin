@@ -47,7 +47,7 @@ public class Jsr305Annotations extends Check {
     private final String[] _allowedAnnotations = { "Nonnull", "Nullable", "SuppressWarnings" };
     private final String[] _allowedMethodAnnotations = { "Nonnull", "CheckForNull", "Override" };
 
-    private boolean _checkAnnotation;
+    private boolean _packageExcluded = false;
 
     public void setPackages( final String[] packageNames ) {
         _packages = transformToUnique( packageNames );
@@ -72,9 +72,11 @@ public class Jsr305Annotations extends Check {
         try {
             if ( aast.getType() == TokenTypes.PACKAGE_DEF ) {
                 final DetailAST nameAST = aast.getLastChild().getPreviousSibling();
-                final FullIdent full = FullIdent.createFullIdent( nameAST );
-                _checkAnnotation = isConfiguredPackage( full.getText() );
-            } else if ( _checkAnnotation ) {
+                _packageExcluded = isPackageExcluded( FullIdent.createFullIdent( nameAST ) );
+            } else if ( _packageExcluded ) {
+                // skip
+                return;
+            } else {
                 handleDefinition( aast );
             }
         } catch ( final RuntimeException e ) {
@@ -83,18 +85,25 @@ public class Jsr305Annotations extends Check {
         }
     }
 
-    private boolean isConfiguredPackage( final String givenPackageName ) {
-        for ( final String excludesPackageName : _excludePackages ) {
-            if ( givenPackageName.startsWith( excludesPackageName ) ) {
-                return false;
-            }
+    private boolean isPackageExcluded( final FullIdent fullIdent ) {
+        if ( fullIdent == null ) {
+            return true;
         }
-        for ( final String includePackageName : _packages ) {
-            if ( givenPackageName.startsWith( includePackageName ) ) {
+        final String packageName = fullIdent.getText();
+        if ( packageName == null ) {
+            return true;
+        }
+        for ( final String excludesPackageName : _excludePackages ) {
+            if ( packageName.startsWith( excludesPackageName ) ) {
                 return true;
             }
         }
-        return false;
+        for ( final String includePackageName : _packages ) {
+            if ( packageName.startsWith( includePackageName ) ) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void handleDefinition( final DetailAST aast ) {
