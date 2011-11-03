@@ -1,9 +1,8 @@
-/**
- *
+/*
  * JSR305CheckstylePlugin - a checkstyle plugin to ensure nullness anotations
  *
  * Copyright (C) 2008 Marcus Thiesen (initial version)
- * Copyright (C) 2008-2009 Jan Burkhardt (maintainer)
+ * Copyright (C) 2008-2011 Jan Burkhardt (maintainer)
  *
  * thanks to Mattias Nissler, Thorsten Ehlers, Fabian Loewner for contributions
  *
@@ -20,16 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- *
  */
-
 package de.bjrke.checkstyle.jsr305;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import antlr.collections.AST;
@@ -53,29 +53,45 @@ public class Jsr305Annotations extends Check {
 
         private final String _annotationName;
 
-        // for later usage
-        @SuppressWarnings( "unused" )
-        private final String _packageName;
+        private final String _fqcn;
 
         private NullnessAnnotation( final String annotationName, final String packageName ) {
             _annotationName = annotationName;
-            _packageName = packageName;
+            _fqcn = packageName + "." + annotationName;
         }
+
     }
+
+    // global constants
+    private static final Map<String, NullnessAnnotation> STRING2ANNOTATION = createString2AnnotationMap();
+
+    private static final Set<NullnessAnnotation> ALLOWED_PARAMETER_ANNOTATIONS = Collections.unmodifiableSet( EnumSet.of(
+            NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE ) );
+    private static final Set<NullnessAnnotation> ALLOWED_METHOD_ANNOTATIONS = Collections.unmodifiableSet( EnumSet.of(
+            NullnessAnnotation.NONNULL, NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.OVERRIDE ) );
 
     private static int[] DEFAULT_MODIFIERS = { TokenTypes.PARAMETER_DEF, TokenTypes.METHOD_DEF, TokenTypes.PACKAGE_DEF };
 
+    // paramters
     private String[] _packages = new String[0];
     private String[] _excludePackages = new String[0];
-    private final EnumSet<NullnessAnnotation> _allowedAnnotations = EnumSet.of( NullnessAnnotation.NONNULL,
-            NullnessAnnotation.NULLABLE );
-    private final EnumSet<NullnessAnnotation> _allowedMethodAnnotations = EnumSet.of( NullnessAnnotation.NONNULL,
-            NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.OVERRIDE );
 
+    // state
     private boolean _packageExcluded = false;
 
     public void setPackages( final String[] packageNames ) {
         _packages = transformToUnique( packageNames );
+    }
+
+    private static Map<String, NullnessAnnotation> createString2AnnotationMap() {
+        final Map<String, NullnessAnnotation> result = new HashMap<String, NullnessAnnotation>();
+
+        for ( final NullnessAnnotation annotation : NullnessAnnotation.values() ) {
+            result.put( annotation._annotationName, annotation );
+            result.put( annotation._fqcn, annotation );
+        }
+
+        return Collections.unmodifiableMap( result );
     }
 
     public void setExcludePackages( final String[] packageNames ) {
@@ -144,12 +160,12 @@ public class Jsr305Annotations extends Check {
         }
 
         // search modifiers
-        final EnumSet<NullnessAnnotation> allowed = type == TokenTypes.METHOD_DEF
-            ? _allowedMethodAnnotations
-            : _allowedAnnotations;
+        final Set<NullnessAnnotation> allowed = type == TokenTypes.METHOD_DEF
+            ? ALLOWED_METHOD_ANNOTATIONS
+            : ALLOWED_PARAMETER_ANNOTATIONS;
         final DetailAST modifiers = aast.findFirstToken( TokenTypes.MODIFIERS );
         if ( modifiers != null ) {
-            for ( final String annotationName : findAnnotationNames( modifiers ) ) {
+            for ( final NullnessAnnotation annotationName : findAnnotationNames( modifiers ) ) {
                 if ( checkAnnotation( allowed, annotationName ) ) {
                     return;
                 }
@@ -192,8 +208,8 @@ public class Jsr305Annotations extends Check {
         return false;
     }
 
-    private List<String> findAnnotationNames( final DetailAST modifiers ) {
-        final List<String> result = new ArrayList<String>();
+    private List<NullnessAnnotation> findAnnotationNames( final DetailAST modifiers ) {
+        final List<NullnessAnnotation> result = new ArrayList<NullnessAnnotation>();
 
         AST child = modifiers.getFirstChild();
         while ( child != null ) {
@@ -202,7 +218,10 @@ public class Jsr305Annotations extends Check {
                 if ( identifier != null ) {
                     final String annotationName = identifier.getText();
                     if ( annotationName != null ) {
-                        result.add( annotationName );
+                        final NullnessAnnotation annotation = STRING2ANNOTATION.get( annotationName );
+                        if ( annotation != null ) {
+                            result.add( annotation );
+                        }
                     }
                 }
             }
@@ -212,16 +231,8 @@ public class Jsr305Annotations extends Check {
         return result;
     }
 
-    private boolean checkAnnotation( final EnumSet<NullnessAnnotation> allowed, final String annotationName ) {
-        if ( annotationName == null ) {
-            return false;
-        }
-        for ( final NullnessAnnotation annotation : allowed ) {
-            if ( annotation._annotationName.equals( annotationName ) ) {
-                return true;
-            }
-        }
-        return false;
+    private boolean checkAnnotation( final Set<NullnessAnnotation> allowed, final NullnessAnnotation annotation ) {
+        return allowed.contains( annotation );
     }
 
 }
