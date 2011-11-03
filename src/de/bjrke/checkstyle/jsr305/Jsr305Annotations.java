@@ -27,6 +27,7 @@ package de.bjrke.checkstyle.jsr305;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,12 +41,36 @@ import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
 public class Jsr305Annotations extends Check {
 
+    private enum NullnessAnnotation {
+
+            OVERRIDE( "Override", "java.lang" ),
+            CHECK_FOR_NULL( "CheckForNull", "javax.annotation" ),
+            NULLABLE( "Nullable", "javax.annotation" ),
+            NONNULL( "Nonnull", "javax.annotation" ),
+            CHECK_RETURN_VALUE( "CheckReturnValue", "javax.annotation" ),
+
+        ;
+
+        private final String _annotationName;
+
+        // for later usage
+        @SuppressWarnings( "unused" )
+        private final String _packageName;
+
+        private NullnessAnnotation( final String annotationName, final String packageName ) {
+            _annotationName = annotationName;
+            _packageName = packageName;
+        }
+    }
+
     private static int[] DEFAULT_MODIFIERS = { TokenTypes.PARAMETER_DEF, TokenTypes.METHOD_DEF, TokenTypes.PACKAGE_DEF };
 
     private String[] _packages = new String[0];
     private String[] _excludePackages = new String[0];
-    private final String[] _allowedAnnotations = { "Nonnull", "Nullable", "SuppressWarnings" };
-    private final String[] _allowedMethodAnnotations = { "Nonnull", "CheckForNull", "Override" };
+    private final EnumSet<NullnessAnnotation> _allowedAnnotations = EnumSet.of( NullnessAnnotation.NONNULL,
+            NullnessAnnotation.NULLABLE );
+    private final EnumSet<NullnessAnnotation> _allowedMethodAnnotations = EnumSet.of( NullnessAnnotation.NONNULL,
+            NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.OVERRIDE );
 
     private boolean _packageExcluded = false;
 
@@ -119,13 +144,13 @@ public class Jsr305Annotations extends Check {
         }
 
         // search modifiers
-        final String[] allowed = type == TokenTypes.METHOD_DEF
+        final EnumSet<NullnessAnnotation> allowed = type == TokenTypes.METHOD_DEF
             ? _allowedMethodAnnotations
             : _allowedAnnotations;
         final DetailAST modifiers = aast.findFirstToken( TokenTypes.MODIFIERS );
         if ( modifiers != null ) {
-            for ( final DetailAST annotation : findAnnotations( modifiers ) ) {
-                if ( checkAnnotation( allowed, annotation.findFirstToken( TokenTypes.IDENT ) ) ) {
+            for ( final String annotationName : findAnnotationNames( modifiers ) ) {
+                if ( checkAnnotation( allowed, annotationName ) ) {
                     return;
                 }
             }
@@ -136,8 +161,8 @@ public class Jsr305Annotations extends Check {
             : "method definition (return value)" ).append( " found, expected one of @" );
 
         String comma = "";
-        for ( final String annotation : allowed ) {
-            sb.append( comma ).append( annotation );
+        for ( final NullnessAnnotation annotation : allowed ) {
+            sb.append( comma ).append( annotation._annotationName );
             comma = ", @";
         }
 
@@ -167,13 +192,19 @@ public class Jsr305Annotations extends Check {
         return false;
     }
 
-    private List<DetailAST> findAnnotations( final DetailAST modifiers ) {
-        final List<DetailAST> result = new ArrayList<DetailAST>();
+    private List<String> findAnnotationNames( final DetailAST modifiers ) {
+        final List<String> result = new ArrayList<String>();
 
         AST child = modifiers.getFirstChild();
         while ( child != null ) {
             if ( child.getType() == TokenTypes.ANNOTATION ) {
-                result.add( (DetailAST) child );
+                final DetailAST identifier = ( (DetailAST) child ).findFirstToken( TokenTypes.IDENT );
+                if ( identifier != null ) {
+                    final String annotationName = identifier.getText();
+                    if ( annotationName != null ) {
+                        result.add( annotationName );
+                    }
+                }
             }
 
             child = child.getNextSibling();
@@ -181,16 +212,12 @@ public class Jsr305Annotations extends Check {
         return result;
     }
 
-    private boolean checkAnnotation( final String[] allowedAnnotations, final DetailAST identifier ) {
-        if ( identifier == null ) {
-            return false;
-        }
-        final String annotationName = identifier.getText();
+    private boolean checkAnnotation( final EnumSet<NullnessAnnotation> allowed, final String annotationName ) {
         if ( annotationName == null ) {
             return false;
         }
-        for ( final String allowed : allowedAnnotations ) {
-            if ( allowed.equals( annotationName ) ) {
+        for ( final NullnessAnnotation annotation : allowed ) {
+            if ( annotation._annotationName.equals( annotationName ) ) {
                 return true;
             }
         }
