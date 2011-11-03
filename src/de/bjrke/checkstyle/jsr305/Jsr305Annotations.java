@@ -44,8 +44,8 @@ public class Jsr305Annotations extends Check {
 
     private String[] _packages = new String[0];
     private String[] _excludePackages = new String[0];
-    private String[] _allowedAnnotations = { "Nonnull", "Nullable", "SuppressWarnings" };
-    private String[] _allowedMethodAnnotations = { "Nonnull", "CheckForNull", "Override" };
+    private final String[] _allowedAnnotations = { "Nonnull", "Nullable", "SuppressWarnings" };
+    private final String[] _allowedMethodAnnotations = { "Nonnull", "CheckForNull", "Override" };
 
     private boolean _checkAnnotation;
 
@@ -55,14 +55,6 @@ public class Jsr305Annotations extends Check {
 
     public void setExcludePackages( final String[] packageNames ) {
         _excludePackages = transformToUnique( packageNames );
-    }
-
-    public void setAllowedAnnotations( final String[] allowedAnnotations ) {
-        _allowedAnnotations = transformToUnique( allowedAnnotations );
-    }
-
-    public void setAllowedMethodAnnotations( final String[] allowedMethodAnnotations ) {
-        _allowedMethodAnnotations = transformToUnique( allowedMethodAnnotations );
     }
 
     private static String[] transformToUnique( final String[] input ) {
