@@ -10,7 +10,7 @@
     <property name="lib.home" value="lib" />
 
     <fileset dir="${lib.home}" id="libs">
-        <include name="checkstyle-all-5.0.jar"/>
+        <include name="checkstyle-5.4-all.jar" />
     </fileset>
 
     <fileset id="checkstyle_metadata" dir="${src}">
