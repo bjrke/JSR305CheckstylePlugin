@@ -22,13 +22,10 @@
  */
 package de.bjrke.checkstyle.jsr305;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +38,10 @@ import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
 public class Jsr305Annotations extends Check {
 
+    //TODO check class definitions - state machine
+    //TODO check correct imports
+    //TODO I18n
+
     private enum NullnessAnnotation {
 
             OVERRIDE( "Override", "java.lang" ),
@@ -48,6 +49,9 @@ public class Jsr305Annotations extends Check {
             NULLABLE( "Nullable", "javax.annotation" ),
             NONNULL( "Nonnull", "javax.annotation" ),
             CHECK_RETURN_VALUE( "CheckReturnValue", "javax.annotation" ),
+            PARAMETERS_ARE_NONNULL_BY_DEFAULT( "ParametersAreNonnullByDefault", "javax.annotation" ),
+            PARAMETERS_ARE_NULLABLE_BY_DEFAULT( "ParametersAreNullableByDefault", "javax.annotation" ),
+            RETURN_VALUES_ARE_NONNULL_BY_DEFAULT( "ReturnValuesAreNonnullByDefault", "edu.umd.cs.findbugs.annotations" ),
 
         ;
 
@@ -65,19 +69,19 @@ public class Jsr305Annotations extends Check {
     // global constants
     private static final Map<String, NullnessAnnotation> STRING2ANNOTATION = createString2AnnotationMap();
 
-    private static final Set<NullnessAnnotation> ALLOWED_PARAMETER_ANNOTATIONS = Collections.unmodifiableSet( EnumSet.of(
-            NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE ) );
-    private static final Set<NullnessAnnotation> ALLOWED_METHOD_ANNOTATIONS = Collections.unmodifiableSet( EnumSet.of(
-            NullnessAnnotation.NONNULL, NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.OVERRIDE ) );
-
     private static int[] DEFAULT_MODIFIERS = { TokenTypes.PARAMETER_DEF, TokenTypes.METHOD_DEF, TokenTypes.PACKAGE_DEF };
 
-    // paramters
+    // parameters
     private String[] _packages = new String[0];
     private String[] _excludePackages = new String[0];
 
     // state
     private boolean _packageExcluded = false;
+
+    private boolean _overriddenMethod = false;
+    private final boolean _returnValuesAreNonnullByDefault = false;
+    private boolean _parametersAreNonnullByDefault = false;
+    private boolean _parametersAreNullableByDefault = false;
 
     public void setPackages( final String[] packageNames ) {
         _packages = transformToUnique( packageNames );
@@ -148,11 +152,6 @@ public class Jsr305Annotations extends Check {
     }
 
     private void handleDefinition( final DetailAST aast ) {
-        // do not check primitives
-        final int type = aast.getType();
-        if ( isPrimitiveType( aast.findFirstToken( TokenTypes.TYPE ) ) ) {
-            return;
-        }
 
         // no definition in catch clause
         if ( aast.getParent().getType() == TokenTypes.LITERAL_CATCH ) {
@@ -160,79 +159,234 @@ public class Jsr305Annotations extends Check {
         }
 
         // search modifiers
-        final Set<NullnessAnnotation> allowed = type == TokenTypes.METHOD_DEF
-            ? ALLOWED_METHOD_ANNOTATIONS
-            : ALLOWED_PARAMETER_ANNOTATIONS;
-        final DetailAST modifiers = aast.findFirstToken( TokenTypes.MODIFIERS );
-        if ( modifiers != null ) {
-            for ( final NullnessAnnotation annotationName : findAnnotationNames( modifiers ) ) {
-                if ( checkAnnotation( allowed, annotationName ) ) {
-                    return;
-                }
+        final int type = aast.getType();
+        switch ( type ) {
+            case TokenTypes.METHOD_DEF:
+                new MethodJsr305Check( aast );
+                break;
+            case TokenTypes.PARAMETER_DEF:
+                new ParameterJsr305Check( aast );
+                break;
+            default:
+                throw new UnsupportedOperationException( "no implementation for " + type );
+        }
+    }
+
+    private final class ParameterJsr305Check extends AbstractJsr305Check {
+
+        ParameterJsr305Check( final DetailAST aast ) {
+            super( aast );
+        }
+
+        @Override
+        protected void runcheck() {
+            checkContainsAny( "Parameter defintion don't need checking, use @Nullable or @Nonnull.",
+                    NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.CHECK_RETURN_VALUE );
+            checkContainsAny( "@Override is not allowed on parameter definition!", NullnessAnnotation.OVERRIDE );
+            checkContainsAny( "@ParametersAreNonnullByDefault is not allowed on parameter definition!",
+                    NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT );
+            checkContainsAny( "@ParametersAreNullableByDefault is not allowed on parameter definition!",
+                    NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT );
+            checkContainsAny( "@ReturnValuesAreNonnullByDefault is not allowed on parameter definition!",
+                    NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT );
+            checkContainsAll( "@Nonnull and @Nullable are not allowed together!", NullnessAnnotation.NONNULL,
+                    NullnessAnnotation.NULLABLE );
+
+            if ( isPrimitiveType() ) {
+                checkContainsAny( "Primitives must not have any nullness annotations!", NullnessAnnotation.CHECK_FOR_NULL,
+                        NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE );
+                return;
+            }
+            if ( _overriddenMethod ) {
+                checkContainsAny( "It is not allowed to increase nullness constraint for overriden method parameter definitions!",
+                        NullnessAnnotation.NONNULL );
+            }
+            if ( _parametersAreNonnullByDefault ) {
+                checkContainsAny(
+                        "It is not necessary to annotate @Nonnull if you annoted the method or class with @ParametersAreNonnullByDefault.",
+                        NullnessAnnotation.NONNULL );
+            }
+            if ( _parametersAreNullableByDefault ) {
+                checkContainsAny(
+                        "It is not necessary to annotate @Nullable if you annoted the method or class with @ParametersAreNullableByDefault.",
+                        NullnessAnnotation.NULLABLE );
+            }
+
+            if ( !_overriddenMethod && !_parametersAreNonnullByDefault && !_parametersAreNullableByDefault ) {
+                checkContainsNone( "No nullness Annotation for parameter definition found!", NullnessAnnotation.NONNULL,
+                        NullnessAnnotation.NULLABLE );
+            }
+
+        }
+    }
+
+    private final class MethodJsr305Check extends AbstractJsr305Check {
+
+        MethodJsr305Check( final DetailAST aast ) {
+            super( aast );
+        }
+
+        @Override
+        protected void runcheck() {
+            _overriddenMethod = containsAny( NullnessAnnotation.OVERRIDE );
+            _parametersAreNonnullByDefault = containsAny( NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT );
+            _parametersAreNullableByDefault = containsAny( NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT );
+
+            if ( _parametersAreNonnullByDefault && _parametersAreNullableByDefault ) {
+                _parametersAreNonnullByDefault = false;
+                _parametersAreNullableByDefault = false;
+            }
+            checkContainsAll( "@ParametersAreNonnullByDefault and @ParametersAreNullableByDefault are not allowed together!",
+                    NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT, NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT );
+            checkContainsAny( "@ReturnValuesAreNonnullByDefault is not allowed on method return values!",
+                    NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT );
+            checkContainsAny( "@Nullable is not allowed on method return values!", NullnessAnnotation.NULLABLE );
+            checkContainsAll( "@Nonnull and @CheckReturnValue are not allowed together!", NullnessAnnotation.NONNULL,
+                    NullnessAnnotation.CHECK_FOR_NULL );
+            checkContainsAll( "@CheckForNull imply @CheckReturnValue, remove it!", NullnessAnnotation.CHECK_RETURN_VALUE,
+                    NullnessAnnotation.CHECK_FOR_NULL );
+            if ( isPrimitiveType() ) {
+                checkContainsAny( "Primitives must not have any nullness annotations!", NullnessAnnotation.CHECK_FOR_NULL,
+                        NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE );
+                return;
+            }
+            if ( _returnValuesAreNonnullByDefault ) {
+                checkContainsAny(
+                        "It is not necessary to annotate @Nonnull if you annoted the class with @ReturnValuesAreNonnullByDefault.",
+                        NullnessAnnotation.NONNULL );
+            } else {
+                checkContainsNone( "Returnvalue must have nullness Annotation (@Nonnull or @CheckForNull)!",
+                        NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.NONNULL, NullnessAnnotation.OVERRIDE );
+            }
+
+            if ( _overriddenMethod ) {
+                checkContainsAny( "Overriden methods allow only @Nonnull.", NullnessAnnotation.CHECK_FOR_NULL,
+                        NullnessAnnotation.NULLABLE );
+                checkContainsAny( "You have to inherit parameter annotations!",
+                        NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT );
+            }
+        }
+    }
+
+    public abstract class AbstractJsr305Check {
+
+        private boolean _errorFound = false;
+        private final Set<NullnessAnnotation> _annotations;
+        private final DetailAST _aast;
+
+        AbstractJsr305Check( final DetailAST aast ) {
+            _aast = aast;
+            if ( aast == null ) {
+                _annotations = Collections.emptySet();
+                return;
+            }
+            _annotations = findAnnotation();
+            runcheck();
+        }
+
+        protected abstract void runcheck();
+
+        protected void checkContainsAny( final String msg, final NullnessAnnotation... annotations ) {
+            if ( !_errorFound && containsAny( annotations ) ) {
+                error( msg );
             }
         }
 
-        final StringBuilder sb = new StringBuilder( "No Annotations for " ).append( type == TokenTypes.PARAMETER_DEF
-            ? "parameter definition"
-            : "method definition (return value)" ).append( " found, expected one of @" );
-
-        String comma = "";
-        for ( final NullnessAnnotation annotation : allowed ) {
-            sb.append( comma ).append( annotation._annotationName );
-            comma = ", @";
-        }
-
-        log( aast.getLineNo(), sb.append( "." ).toString() );
-    }
-
-    private boolean isPrimitiveType( final DetailAST parameterType ) {
-        if ( parameterType == null ) {
+        protected boolean containsAny( final NullnessAnnotation... annotations ) {
+            if ( _annotations.isEmpty() ) {
+                return false;
+            }
+            for ( final NullnessAnnotation obj : annotations ) {
+                if ( _annotations.contains( obj ) ) {
+                    return true;
+                }
+            }
             return false;
         }
-        final AST identToken = parameterType.getFirstChild();
-        if ( identToken == null ) {
+
+        protected void checkContainsAll( final String msg, final NullnessAnnotation... annotations ) {
+            if ( !_errorFound && containsAll( annotations ) ) {
+                error( msg );
+            }
+        }
+
+        protected boolean containsAll( final NullnessAnnotation... annotations ) {
+            if ( _annotations.isEmpty() ) {
+                return annotations.length == 0;
+            }
+            for ( final NullnessAnnotation obj : annotations ) {
+                if ( !_annotations.contains( obj ) ) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        protected void checkContainsNone( final String msg, final NullnessAnnotation... annotations ) {
+            if ( !_errorFound && !containsAny( annotations ) ) {
+                error( msg );
+            }
+        }
+
+        private void error( final String msg ) {
+            if ( !_errorFound ) {
+                log( _aast, msg );
+            }
+            _errorFound = true;
+        }
+
+        protected boolean isPrimitiveType() {
+            final DetailAST parameterType = _aast.findFirstToken( TokenTypes.TYPE );
+            if ( parameterType == null ) {
+                return false;
+            }
+            final AST identToken = parameterType.getFirstChild();
+            if ( identToken == null ) {
+                return false;
+            }
+            switch ( identToken.getType() ) {
+                case TokenTypes.LITERAL_BOOLEAN:
+                case TokenTypes.LITERAL_INT:
+                case TokenTypes.LITERAL_LONG:
+                case TokenTypes.LITERAL_SHORT:
+                case TokenTypes.LITERAL_BYTE:
+                case TokenTypes.LITERAL_CHAR:
+                case TokenTypes.LITERAL_VOID:
+                case TokenTypes.LITERAL_DOUBLE:
+                case TokenTypes.LITERAL_FLOAT:
+                    return true;
+            }
             return false;
         }
-        switch ( identToken.getType() ) {
-            case TokenTypes.LITERAL_BOOLEAN:
-            case TokenTypes.LITERAL_INT:
-            case TokenTypes.LITERAL_LONG:
-            case TokenTypes.LITERAL_SHORT:
-            case TokenTypes.LITERAL_BYTE:
-            case TokenTypes.LITERAL_CHAR:
-            case TokenTypes.LITERAL_VOID:
-            case TokenTypes.LITERAL_DOUBLE:
-            case TokenTypes.LITERAL_FLOAT:
-                return true;
-        }
-        return false;
-    }
 
-    private List<NullnessAnnotation> findAnnotationNames( final DetailAST modifiers ) {
-        final List<NullnessAnnotation> result = new ArrayList<NullnessAnnotation>();
+        private Set<NullnessAnnotation> findAnnotation() {
+            final Set<NullnessAnnotation> result = new HashSet<NullnessAnnotation>();
 
-        AST child = modifiers.getFirstChild();
-        while ( child != null ) {
-            if ( child.getType() == TokenTypes.ANNOTATION ) {
-                final DetailAST identifier = ( (DetailAST) child ).findFirstToken( TokenTypes.IDENT );
-                if ( identifier != null ) {
-                    final String annotationName = identifier.getText();
-                    if ( annotationName != null ) {
-                        final NullnessAnnotation annotation = STRING2ANNOTATION.get( annotationName );
-                        if ( annotation != null ) {
-                            result.add( annotation );
+            final DetailAST modifiers = _aast.findFirstToken( TokenTypes.MODIFIERS );
+            if ( modifiers == null ) {
+                return result;
+            }
+            AST child = modifiers.getFirstChild();
+            while ( child != null ) {
+                if ( child.getType() == TokenTypes.ANNOTATION ) {
+                    final DetailAST identifier = ( (DetailAST) child ).findFirstToken( TokenTypes.IDENT );
+                    if ( identifier != null ) {
+                        final String annotationName = identifier.getText();
+                        if ( annotationName != null ) {
+                            final NullnessAnnotation annotation = STRING2ANNOTATION.get( annotationName );
+                            if ( annotation != null && !result.add( annotation ) ) {
+                                error( "Double Annotation (" + annotation._annotationName + ") found!" );
+                            }
                         }
                     }
                 }
+
+                child = child.getNextSibling();
             }
 
-            child = child.getNextSibling();
+            return result;
         }
-        return result;
-    }
 
-    private boolean checkAnnotation( final Set<NullnessAnnotation> allowed, final NullnessAnnotation annotation ) {
-        return allowed.contains( annotation );
     }
 
 }
