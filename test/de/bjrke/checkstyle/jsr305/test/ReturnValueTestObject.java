@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.ParametersAreNullableByDefault;
 
-public class ReturnValueTestObject implements Comparable<ReturnValueTestObject>, Serializable {
+public class ReturnValueTestObject implements Comparable<ReturnValueTestObject>, Serializable, Runnable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,7 +38,7 @@ public class ReturnValueTestObject implements Comparable<ReturnValueTestObject>,
         return new Object();
     }
 
-    //error
+    // ok
     @CheckReturnValue
     @CheckForNull
     Object returnCheckReturnValueCheckForNull() {
@@ -68,8 +68,8 @@ public class ReturnValueTestObject implements Comparable<ReturnValueTestObject>,
 
     //ok
     @Override
-    public int compareTo( @Nullable final ReturnValueTestObject o ) {
-        return 0;
+    public void run() {
+        hashCode();
     }
 
     //ok
@@ -85,6 +85,25 @@ public class ReturnValueTestObject implements Comparable<ReturnValueTestObject>,
     @Nonnull
     public String concat( final String s1, final String s2 ) {
         return s1 + s2;
+    }
+
+    // error
+    @Override
+    @CheckReturnValue
+    public int compareTo( @Nullable final ReturnValueTestObject o ) {
+        return 0;
+    }
+
+    // error
+    @CheckReturnValue
+    public void voidNoCheckReturnValue() {
+        hashCode();
+    }
+
+    // error
+    @Nonnull
+    public void voidNoNonnull() {
+        hashCode();
     }
 
 }

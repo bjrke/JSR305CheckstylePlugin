@@ -32,12 +32,14 @@ public class Jsr305AnnotationsTest {
 
                 new ExpectedWarning( ReturnValueTestObject.class, 29, 5 ), //
                 new ExpectedWarning( ReturnValueTestObject.class, 35, 5 ), //
-                new ExpectedWarning( ReturnValueTestObject.class, 42, 5 ), //
                 new ExpectedWarning( ReturnValueTestObject.class, 56, 5 ), //
                 new ExpectedWarning( ReturnValueTestObject.class, 63, 5 ), //
                 new ExpectedWarning( ReturnValueTestObject.class, 83, 5 ), //
-                new ExpectedWarning( ReturnValueTestObject.class, 86, 27 ), //  <- fixen
-                new ExpectedWarning( ReturnValueTestObject.class, 86, 44 ), //  <- fixen
+                new ExpectedWarning( ReturnValueTestObject.class, 86, 27 ), //
+                new ExpectedWarning( ReturnValueTestObject.class, 86, 44 ), //
+                new ExpectedWarning( ReturnValueTestObject.class, 91, 5 ), //
+                new ExpectedWarning( ReturnValueTestObject.class, 98, 5 ), //
+                new ExpectedWarning( ReturnValueTestObject.class, 104, 5 ), //
 
                 new ExpectedWarning( ConstrutorTestObject.class, 19, 34 ), //
                 new ExpectedWarning( ConstrutorTestObject.class, 25, 34 ), //

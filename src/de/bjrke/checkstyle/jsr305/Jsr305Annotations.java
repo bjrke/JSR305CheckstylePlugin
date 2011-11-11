@@ -243,8 +243,12 @@ public class Jsr305Annotations extends Check {
             checkContainsAny( "@Nullable is not allowed on method return values!", NullnessAnnotation.NULLABLE );
             checkContainsAll( "@Nonnull and @CheckReturnValue are not allowed together!", NullnessAnnotation.NONNULL,
                     NullnessAnnotation.CHECK_FOR_NULL );
-            checkContainsAll( "@CheckForNull imply @CheckReturnValue, remove it!", NullnessAnnotation.CHECK_RETURN_VALUE,
-                    NullnessAnnotation.CHECK_FOR_NULL );
+            checkContainsAll( "@CheckReturnValue is not allowed on overriden methods, annotate the interface or superclass!",
+                    NullnessAnnotation.CHECK_RETURN_VALUE, NullnessAnnotation.OVERRIDE );
+            if ( isVoid() ) {
+                checkContainsAny( "There is nothing to check on void return methods, remove @CheckReturnValue!",
+                        NullnessAnnotation.CHECK_RETURN_VALUE );
+            }
             if ( isPrimitiveType() ) {
                 checkContainsAny( "Primitives must not have any nullness annotations!", NullnessAnnotation.CHECK_FOR_NULL,
                         NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE );
@@ -336,27 +340,34 @@ public class Jsr305Annotations extends Check {
         }
 
         protected boolean isPrimitiveType() {
-            final DetailAST parameterType = _aast.findFirstToken( TokenTypes.TYPE );
-            if ( parameterType == null ) {
-                return false;
-            }
-            final AST identToken = parameterType.getFirstChild();
-            if ( identToken == null ) {
-                return false;
-            }
-            switch ( identToken.getType() ) {
-                case TokenTypes.LITERAL_BOOLEAN:
-                case TokenTypes.LITERAL_INT:
-                case TokenTypes.LITERAL_LONG:
-                case TokenTypes.LITERAL_SHORT:
-                case TokenTypes.LITERAL_BYTE:
-                case TokenTypes.LITERAL_CHAR:
-                case TokenTypes.LITERAL_VOID:
-                case TokenTypes.LITERAL_DOUBLE:
-                case TokenTypes.LITERAL_FLOAT:
-                    return true;
+            final AST identToken = findIdentToken();
+            if ( identToken != null ) {
+                switch ( identToken.getType() ) {
+                    case TokenTypes.LITERAL_BOOLEAN:
+                    case TokenTypes.LITERAL_INT:
+                    case TokenTypes.LITERAL_LONG:
+                    case TokenTypes.LITERAL_SHORT:
+                    case TokenTypes.LITERAL_BYTE:
+                    case TokenTypes.LITERAL_CHAR:
+                    case TokenTypes.LITERAL_VOID:
+                    case TokenTypes.LITERAL_DOUBLE:
+                    case TokenTypes.LITERAL_FLOAT:
+                        return true;
+                }
             }
             return false;
+        }
+
+        protected boolean isVoid() {
+            final AST identToken = findIdentToken();
+            return identToken != null && identToken.getType() == TokenTypes.LITERAL_VOID;
+        }
+
+        private AST findIdentToken() {
+            final DetailAST parameterType = _aast.findFirstToken( TokenTypes.TYPE );
+            return parameterType != null
+                ? parameterType.getFirstChild()
+                : null;
         }
 
         private Set<NullnessAnnotation> findAnnotation() {
