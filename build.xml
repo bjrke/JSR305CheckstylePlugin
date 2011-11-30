@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project name="JSR305CheckstylePlugin" default="jar" basedir=".">
 
-    <property name="version" value="0.4-SNAPSHOT" />
+    <tstamp>
+        <format property="TIMESTAMP" pattern="yyyyMMdd-HHmm" />
+    </tstamp>
+
+    <property name="version" value="0.4.0.SNAPSHOT_${TIMESTAMP}" />
     <property name="src" value="src" />
     <property name="build" value="build" />
     <property name="classes" value="${build}/classes" />
