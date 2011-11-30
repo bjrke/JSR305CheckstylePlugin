@@ -241,7 +241,7 @@ public class Jsr305Annotations extends Check {
             checkContainsAny( "@ReturnValuesAreNonnullByDefault is not allowed on method return values!",
                     NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT );
             checkContainsAny( "@Nullable is not allowed on method return values!", NullnessAnnotation.NULLABLE );
-            checkContainsAll( "@Nonnull and @CheckReturnValue are not allowed together!", NullnessAnnotation.NONNULL,
+            checkContainsAll( "@Nonnull and @CheckForNull are not allowed together!", NullnessAnnotation.NONNULL,
                     NullnessAnnotation.CHECK_FOR_NULL );
             checkContainsAll( "@CheckReturnValue is not allowed on overriden methods, annotate the interface or superclass!",
                     NullnessAnnotation.CHECK_RETURN_VALUE, NullnessAnnotation.OVERRIDE );
