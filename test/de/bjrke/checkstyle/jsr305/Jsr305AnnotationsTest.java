@@ -3,7 +3,8 @@ package de.bjrke.checkstyle.jsr305;
 import org.testng.annotations.Test;
 
 import de.bjrke.checkstyle.jsr305.Jsr305AnnationsTestUtil.ExpectedWarning;
-import de.bjrke.checkstyle.jsr305.test.ConstrutorTestObject;
+import de.bjrke.checkstyle.jsr305.test.ConstructorTestObject;
+import de.bjrke.checkstyle.jsr305.test.DefectConstructorTest;
 import de.bjrke.checkstyle.jsr305.test.ParameterTestObject;
 import de.bjrke.checkstyle.jsr305.test.PrimitivesTestObject;
 import de.bjrke.checkstyle.jsr305.test.ReturnValueTestObject;
@@ -41,12 +42,12 @@ public class Jsr305AnnotationsTest {
                 new ExpectedWarning( ReturnValueTestObject.class, 98, 5 ), //
                 new ExpectedWarning( ReturnValueTestObject.class, 104, 5 ), //
 
-                new ExpectedWarning( ConstrutorTestObject.class, 19, 34 ), //
-                new ExpectedWarning( ConstrutorTestObject.class, 25, 34 ), //
-                new ExpectedWarning( ConstrutorTestObject.class, 32, 34 ), //
-                new ExpectedWarning( ConstrutorTestObject.class, 39, 60 ), //
-                new ExpectedWarning( ConstrutorTestObject.class, 46, 61 ), //
-                new ExpectedWarning( ConstrutorTestObject.class, 53, 34 )
+                new ExpectedWarning( ConstructorTestObject.class, 19, 35 ), //
+                new ExpectedWarning( ConstructorTestObject.class, 25, 35 ), //
+                new ExpectedWarning( ConstructorTestObject.class, 39, 35 ), //
+                new ExpectedWarning( ConstructorTestObject.class, 53, 53 ), //
+
+                new ExpectedWarning( DefectConstructorTest.class ) //
 
         );
     }

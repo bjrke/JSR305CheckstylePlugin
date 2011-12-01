@@ -69,7 +69,8 @@ public class Jsr305Annotations extends Check {
     // global constants
     private static final Map<String, NullnessAnnotation> STRING2ANNOTATION = createString2AnnotationMap();
 
-    private static int[] DEFAULT_MODIFIERS = { TokenTypes.PARAMETER_DEF, TokenTypes.METHOD_DEF, TokenTypes.PACKAGE_DEF };
+    private static int[] DEFAULT_MODIFIERS = { TokenTypes.PARAMETER_DEF, TokenTypes.METHOD_DEF, TokenTypes.PACKAGE_DEF,
+            TokenTypes.CTOR_DEF };
 
     // parameters
     private String[] _packages = new String[0];
@@ -164,6 +165,9 @@ public class Jsr305Annotations extends Check {
             case TokenTypes.METHOD_DEF:
                 new MethodJsr305Check( aast );
                 break;
+            case TokenTypes.CTOR_DEF:
+                new ConstructorJsr305Check( aast );
+                break;
             case TokenTypes.PARAMETER_DEF:
                 new ParameterJsr305Check( aast );
                 break;
@@ -220,14 +224,14 @@ public class Jsr305Annotations extends Check {
         }
     }
 
-    private final class MethodJsr305Check extends AbstractJsr305Check {
+    private abstract class AbstractMethodJsr305Check extends AbstractJsr305Check {
 
-        MethodJsr305Check( final DetailAST aast ) {
+        AbstractMethodJsr305Check( final DetailAST aast ) {
             super( aast );
         }
 
         @Override
-        protected void runcheck() {
+        protected final void runcheck() {
             _overriddenMethod = containsAny( NullnessAnnotation.OVERRIDE );
             _parametersAreNonnullByDefault = containsAny( NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT );
             _parametersAreNullableByDefault = containsAny( NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT );
@@ -238,6 +242,21 @@ public class Jsr305Annotations extends Check {
             }
             checkContainsAll( "@ParametersAreNonnullByDefault and @ParametersAreNullableByDefault are not allowed together!",
                     NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT, NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT );
+            runReturnAnnotationCheck();
+        }
+
+        protected abstract void runReturnAnnotationCheck();
+
+    }
+
+    private final class MethodJsr305Check extends AbstractMethodJsr305Check {
+
+        MethodJsr305Check( final DetailAST aast ) {
+            super( aast );
+        }
+
+        @Override
+        protected void runReturnAnnotationCheck() {
             checkContainsAny( "@ReturnValuesAreNonnullByDefault is not allowed on method return values!",
                     NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT );
             checkContainsAny( "@Nullable is not allowed on method return values!", NullnessAnnotation.NULLABLE );
@@ -245,6 +264,7 @@ public class Jsr305Annotations extends Check {
                     NullnessAnnotation.CHECK_FOR_NULL );
             checkContainsAll( "@CheckReturnValue is not allowed on overriden methods, annotate the interface or superclass!",
                     NullnessAnnotation.CHECK_RETURN_VALUE, NullnessAnnotation.OVERRIDE );
+
             if ( isVoid() ) {
                 checkContainsAny( "There is nothing to check on void return methods, remove @CheckReturnValue!",
                         NullnessAnnotation.CHECK_RETURN_VALUE );
@@ -270,6 +290,22 @@ public class Jsr305Annotations extends Check {
                         NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT );
             }
         }
+
+    }
+
+    private final class ConstructorJsr305Check extends AbstractMethodJsr305Check {
+
+        ConstructorJsr305Check( final DetailAST aast ) {
+            super( aast );
+        }
+
+        @Override
+        protected void runReturnAnnotationCheck() {
+            checkContainsAny( "Constructors have no return Value and must not be annotated!", NullnessAnnotation.CHECK_FOR_NULL,
+                    NullnessAnnotation.CHECK_RETURN_VALUE, NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE,
+                    NullnessAnnotation.OVERRIDE );
+        }
+
     }
 
     public abstract class AbstractJsr305Check {
