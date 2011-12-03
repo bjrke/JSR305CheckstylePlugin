@@ -75,6 +75,7 @@ public class Jsr305Annotations extends Check {
     // parameters
     private String[] _packages = new String[0];
     private String[] _excludePackages = new String[0];
+    private boolean _allowOverriding = false;
 
     // state
     private boolean _packageExcluded = false;
@@ -176,6 +177,14 @@ public class Jsr305Annotations extends Check {
         }
     }
 
+    public void setAllowOverriding( final boolean allowOverriding ) {
+        _allowOverriding = allowOverriding;
+    }
+
+    public boolean isAllowOverriding() {
+        return _allowOverriding;
+    }
+
     private final class ParameterJsr305Check extends AbstractJsr305Check {
 
         ParameterJsr305Check( final DetailAST aast ) {
@@ -201,7 +210,7 @@ public class Jsr305Annotations extends Check {
                         NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE );
                 return;
             }
-            if ( _overriddenMethod ) {
+            if ( _overriddenMethod && !_allowOverriding ) {
                 checkContainsAny( "It is not allowed to increase nullness constraint for overriden method parameter definitions!",
                         NullnessAnnotation.NONNULL );
             }
@@ -283,9 +292,12 @@ public class Jsr305Annotations extends Check {
                         NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.NONNULL, NullnessAnnotation.OVERRIDE );
             }
 
-            if ( _overriddenMethod ) {
+            if ( _overriddenMethod && !_allowOverriding ) {
                 checkContainsAny( "Overriden methods allow only @Nonnull.", NullnessAnnotation.CHECK_FOR_NULL,
                         NullnessAnnotation.NULLABLE );
+            }
+
+            if ( _overriddenMethod ) {
                 checkContainsAny( "You have to inherit parameter annotations!",
                         NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT );
             }
