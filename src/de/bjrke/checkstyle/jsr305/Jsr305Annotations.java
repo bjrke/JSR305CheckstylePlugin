@@ -388,34 +388,51 @@ public class Jsr305Annotations extends Check {
         }
 
         protected boolean isPrimitiveType() {
-            final AST identToken = findIdentToken();
-            if ( identToken != null ) {
-                switch ( identToken.getType() ) {
-                    case TokenTypes.LITERAL_BOOLEAN:
-                    case TokenTypes.LITERAL_INT:
-                    case TokenTypes.LITERAL_LONG:
-                    case TokenTypes.LITERAL_SHORT:
-                    case TokenTypes.LITERAL_BYTE:
-                    case TokenTypes.LITERAL_CHAR:
-                    case TokenTypes.LITERAL_VOID:
-                    case TokenTypes.LITERAL_DOUBLE:
-                    case TokenTypes.LITERAL_FLOAT:
-                        return true;
-                }
+            final DetailAST parameterType = _aast.findFirstToken( TokenTypes.TYPE );
+            if ( parameterType == null ) {
+                return false;
+            }
+            final DetailAST identToken = parameterType.getFirstChild();
+
+            if ( identToken == null ) {
+                return false;
+            }
+            switch ( identToken.getType() ) {
+                case TokenTypes.LITERAL_BOOLEAN:
+                case TokenTypes.LITERAL_INT:
+                case TokenTypes.LITERAL_LONG:
+                case TokenTypes.LITERAL_SHORT:
+                case TokenTypes.LITERAL_BYTE:
+                case TokenTypes.LITERAL_CHAR:
+                case TokenTypes.LITERAL_VOID:
+                case TokenTypes.LITERAL_DOUBLE:
+                case TokenTypes.LITERAL_FLOAT:
+                    return !isArrayOrElipsis( parameterType );
+            }
+
+            return false;
+        }
+
+        private boolean isArrayOrElipsis( final DetailAST identToken ) {
+            final DetailAST next = identToken.getNextSibling();
+            if ( next == null ) {
+                return false;
+            }
+            switch ( next.getType() ) {
+                case TokenTypes.ARRAY_DECLARATOR:
+                case TokenTypes.ELLIPSIS:
+                    return true;
             }
             return false;
         }
 
         protected boolean isVoid() {
-            final AST identToken = findIdentToken();
-            return identToken != null && identToken.getType() == TokenTypes.LITERAL_VOID;
-        }
-
-        private AST findIdentToken() {
             final DetailAST parameterType = _aast.findFirstToken( TokenTypes.TYPE );
-            return parameterType != null
-                ? parameterType.getFirstChild()
-                : null;
+            if ( parameterType == null ) {
+                return false;
+            }
+            final DetailAST identToken = parameterType.getFirstChild();
+            return identToken != null && identToken.getType() == TokenTypes.LITERAL_VOID;
         }
 
         private Set<NullnessAnnotation> findAnnotation() {

@@ -3,6 +3,7 @@ package de.bjrke.checkstyle.jsr305;
 import org.testng.annotations.Test;
 
 import de.bjrke.checkstyle.jsr305.Jsr305AnnationsTestUtil.ExpectedWarning;
+import de.bjrke.checkstyle.jsr305.test.ArraysTestObject;
 import de.bjrke.checkstyle.jsr305.test.ConstructorTestObject;
 import de.bjrke.checkstyle.jsr305.test.DefectConstructorTest;
 import de.bjrke.checkstyle.jsr305.test.ParameterTestObject;
@@ -14,8 +15,8 @@ public class Jsr305AnnotationsTest {
     @Test
     public void test() {
         Jsr305AnnationsTestUtil.check(
-        //
-                new ExpectedWarning( ParameterTestObject.class, 15, 45 ), //
+
+        new ExpectedWarning( ParameterTestObject.class, 15, 45 ), //
                 new ExpectedWarning( ParameterTestObject.class, 20, 46 ), //
                 new ExpectedWarning( ParameterTestObject.class, 20, 63 ), //
                 new ExpectedWarning( ParameterTestObject.class, 50, 42 ), //
@@ -47,7 +48,16 @@ public class Jsr305AnnotationsTest {
                 new ExpectedWarning( ConstructorTestObject.class, 39, 35 ), //
                 new ExpectedWarning( ConstructorTestObject.class, 53, 53 ), //
 
-                new ExpectedWarning( DefectConstructorTest.class ) //
+                new ExpectedWarning( DefectConstructorTest.class ), //
+
+                new ExpectedWarning( ArraysTestObject.class, 41, 23 ), //
+                new ExpectedWarning( ArraysTestObject.class, 56, 23 ), //
+
+                new ExpectedWarning( ArraysTestObject.class, 71, 23 ), //
+                new ExpectedWarning( ArraysTestObject.class, 86, 23 ), //
+                new ExpectedWarning( ArraysTestObject.class, 100, 8 ), //
+                new ExpectedWarning( ArraysTestObject.class, 115, 33 ), //
+                new ExpectedWarning( ArraysTestObject.class, 130, 35 ) //
 
         );
     }
