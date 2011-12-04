@@ -75,7 +75,8 @@ public class Jsr305Annotations extends Check {
     // parameters
     private String[] _packages = new String[0];
     private String[] _excludePackages = new String[0];
-    private boolean _allowOverriding = false;
+    private boolean _allowOverridingReturnValue = false;
+    private boolean _allowOverridingParameter = false;
 
     // state
     private boolean _packageExcluded = false;
@@ -177,12 +178,12 @@ public class Jsr305Annotations extends Check {
         }
     }
 
-    public void setAllowOverriding( final boolean allowOverriding ) {
-        _allowOverriding = allowOverriding;
+    public void setAllowOverridingReturnValue( final boolean allowOverridingReturnValue ) {
+        _allowOverridingReturnValue = allowOverridingReturnValue;
     }
 
-    public boolean isAllowOverriding() {
-        return _allowOverriding;
+    public void setAllowOverridingParameter( final boolean allowOverridingParameter ) {
+        _allowOverridingParameter = allowOverridingParameter;
     }
 
     private final class ParameterJsr305Check extends AbstractJsr305Check {
@@ -210,7 +211,7 @@ public class Jsr305Annotations extends Check {
                         NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE );
                 return;
             }
-            if ( _overriddenMethod && !_allowOverriding ) {
+            if ( _overriddenMethod && !_allowOverridingParameter ) {
                 checkContainsAny( "It is not allowed to increase nullness constraint for overriden method parameter definitions!",
                         NullnessAnnotation.NONNULL );
             }
@@ -292,7 +293,7 @@ public class Jsr305Annotations extends Check {
                         NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.NONNULL, NullnessAnnotation.OVERRIDE );
             }
 
-            if ( _overriddenMethod && !_allowOverriding ) {
+            if ( _overriddenMethod && !_allowOverridingReturnValue ) {
                 checkContainsAny( "Overriden methods allow only @Nonnull.", NullnessAnnotation.CHECK_FOR_NULL,
                         NullnessAnnotation.NULLABLE );
             }

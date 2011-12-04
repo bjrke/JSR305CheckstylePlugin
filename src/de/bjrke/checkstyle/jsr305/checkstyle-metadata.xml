@@ -11,8 +11,11 @@
             <property-metadata name="excludedPackages" datatype="String">
                 <description>Packages excluded from checking.</description>
             </property-metadata>
-            <property-metadata name="allowOverriding" datatype="Boolean" default-value="false">
-                <description>Allow Overriding values, useful for upgrading.</description>
+            <property-metadata name="allowOverridingReturnValue" datatype="Boolean" default-value="false">
+                <description>Allow Overriding return values, useful for upgrading.</description>
+            </property-metadata>
+            <property-metadata name="allowOverridingParameter" datatype="Boolean" default-value="false">
+                <description>Allow Overriding paramaters, useful for upgrading.</description>
             </property-metadata>
         </rule-metadata>
     </rule-group-metadata>
