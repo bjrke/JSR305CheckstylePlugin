@@ -115,16 +115,16 @@ public class Jsr305Annotations extends Check {
     }
 
     @Override
-    public void visitToken( final DetailAST aast ) {
+    public void visitToken( final DetailAST ast ) {
         try {
-            if ( aast.getType() == TokenTypes.PACKAGE_DEF ) {
-                final DetailAST nameAST = aast.getLastChild().getPreviousSibling();
+            if ( ast.getType() == TokenTypes.PACKAGE_DEF ) {
+                final DetailAST nameAST = ast.getLastChild().getPreviousSibling();
                 _packageExcluded = isPackageExcluded( FullIdent.createFullIdent( nameAST ) );
             } else if ( _packageExcluded ) {
                 // skip
                 return;
             } else {
-                handleDefinition( aast );
+                handleDefinition( ast );
             }
         } catch ( final RuntimeException e ) {
             e.printStackTrace();
@@ -153,24 +153,24 @@ public class Jsr305Annotations extends Check {
         return true;
     }
 
-    private void handleDefinition( final DetailAST aast ) {
+    private void handleDefinition( final DetailAST ast ) {
 
         // no definition in catch clause
-        if ( aast.getParent().getType() == TokenTypes.LITERAL_CATCH ) {
+        if ( ast.getParent().getType() == TokenTypes.LITERAL_CATCH ) {
             return;
         }
 
         // search modifiers
-        final int type = aast.getType();
+        final int type = ast.getType();
         switch ( type ) {
             case TokenTypes.METHOD_DEF:
-                new MethodJsr305Check( aast );
+                new MethodJsr305Check( ast );
                 break;
             case TokenTypes.CTOR_DEF:
-                new ConstructorJsr305Check( aast );
+                new ConstructorJsr305Check( ast );
                 break;
             case TokenTypes.PARAMETER_DEF:
-                new ParameterJsr305Check( aast );
+                new ParameterJsr305Check( ast );
                 break;
             default:
                 throw new UnsupportedOperationException( "no implementation for " + type );
@@ -187,8 +187,8 @@ public class Jsr305Annotations extends Check {
 
     private final class ParameterJsr305Check extends AbstractJsr305Check {
 
-        ParameterJsr305Check( final DetailAST aast ) {
-            super( aast );
+        ParameterJsr305Check( final DetailAST ast ) {
+            super( ast );
         }
 
         @Override
@@ -235,8 +235,8 @@ public class Jsr305Annotations extends Check {
 
     private abstract class AbstractMethodJsr305Check extends AbstractJsr305Check {
 
-        AbstractMethodJsr305Check( final DetailAST aast ) {
-            super( aast );
+        AbstractMethodJsr305Check( final DetailAST ast ) {
+            super( ast );
         }
 
         @Override
@@ -260,8 +260,8 @@ public class Jsr305Annotations extends Check {
 
     private final class MethodJsr305Check extends AbstractMethodJsr305Check {
 
-        MethodJsr305Check( final DetailAST aast ) {
-            super( aast );
+        MethodJsr305Check( final DetailAST ast ) {
+            super( ast );
         }
 
         @Override
@@ -307,8 +307,8 @@ public class Jsr305Annotations extends Check {
 
     private final class ConstructorJsr305Check extends AbstractMethodJsr305Check {
 
-        ConstructorJsr305Check( final DetailAST aast ) {
-            super( aast );
+        ConstructorJsr305Check( final DetailAST ast ) {
+            super( ast );
         }
 
         @Override
@@ -324,11 +324,11 @@ public class Jsr305Annotations extends Check {
 
         private boolean _errorFound = false;
         private final Set<NullnessAnnotation> _annotations;
-        private final DetailAST _aast;
+        private final DetailAST _ast;
 
-        AbstractJsr305Check( final DetailAST aast ) {
-            _aast = aast;
-            if ( aast == null ) {
+        AbstractJsr305Check( final DetailAST ast ) {
+            _ast = ast;
+            if ( ast == null ) {
                 _annotations = Collections.emptySet();
                 return;
             }
@@ -382,13 +382,13 @@ public class Jsr305Annotations extends Check {
 
         private void error( final String msg ) {
             if ( !_errorFound ) {
-                log( _aast, msg );
+                log( _ast, msg );
             }
             _errorFound = true;
         }
 
         protected boolean isPrimitiveType() {
-            final DetailAST parameterType = _aast.findFirstToken( TokenTypes.TYPE );
+            final DetailAST parameterType = _ast.findFirstToken( TokenTypes.TYPE );
             if ( parameterType == null ) {
                 return false;
             }
@@ -427,7 +427,7 @@ public class Jsr305Annotations extends Check {
         }
 
         protected boolean isVoid() {
-            final DetailAST parameterType = _aast.findFirstToken( TokenTypes.TYPE );
+            final DetailAST parameterType = _ast.findFirstToken( TokenTypes.TYPE );
             if ( parameterType == null ) {
                 return false;
             }
@@ -438,7 +438,7 @@ public class Jsr305Annotations extends Check {
         private Set<NullnessAnnotation> findAnnotation() {
             final Set<NullnessAnnotation> result = new HashSet<NullnessAnnotation>();
 
-            final DetailAST modifiers = _aast.findFirstToken( TokenTypes.MODIFIERS );
+            final DetailAST modifiers = _ast.findFirstToken( TokenTypes.MODIFIERS );
             if ( modifiers == null ) {
                 return result;
             }
