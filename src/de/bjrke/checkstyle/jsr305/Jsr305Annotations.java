@@ -35,10 +35,8 @@ import com.puppycrawl.tools.checkstyle.api.Check;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FullIdent;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
-
 public class Jsr305Annotations extends Check {
 
-    //TODO check class definitions - state machine
     //TODO check correct imports
     //TODO I18n
 
@@ -70,7 +68,7 @@ public class Jsr305Annotations extends Check {
     private static final Map<String, NullnessAnnotation> STRING2ANNOTATION = createString2AnnotationMap();
 
     private static int[] DEFAULT_MODIFIERS = { TokenTypes.PARAMETER_DEF, TokenTypes.METHOD_DEF, TokenTypes.PACKAGE_DEF,
-            TokenTypes.CTOR_DEF };
+            TokenTypes.CTOR_DEF, TokenTypes.CLASS_DEF, TokenTypes.INTERFACE_DEF };
 
     // parameters
     private String[] _packages = new String[0];
@@ -80,11 +78,6 @@ public class Jsr305Annotations extends Check {
 
     // state
     private boolean _packageExcluded = false;
-
-    private boolean _overriddenMethod = false;
-    private final boolean _returnValuesAreNonnullByDefault = false;
-    private boolean _parametersAreNonnullByDefault = false;
-    private boolean _parametersAreNullableByDefault = false;
 
     public void setPackages( final String[] packageNames ) {
         _packages = transformToUnique( packageNames );
@@ -112,7 +105,7 @@ public class Jsr305Annotations extends Check {
 
     @Override
     public int[] getDefaultTokens() {
-        return DEFAULT_MODIFIERS;
+        return DEFAULT_MODIFIERS.clone();
     }
 
     @Override
@@ -157,7 +150,8 @@ public class Jsr305Annotations extends Check {
     private void handleDefinition( final DetailAST ast ) {
 
         // no definition in catch clause
-        if ( ast.getParent().getType() == TokenTypes.LITERAL_CATCH ) {
+        DetailAST parent = ast.getParent();
+        if ( parent != null && parent.getType() == TokenTypes.LITERAL_CATCH ) {
             return;
         }
 
@@ -173,6 +167,10 @@ public class Jsr305Annotations extends Check {
             case TokenTypes.PARAMETER_DEF:
                 new ParameterJsr305Check( ast );
                 break;
+            case TokenTypes.CLASS_DEF:
+            case TokenTypes.INTERFACE_DEF:
+                new ClassJsr305Check( ast );
+                break;
             default:
                 throw new UnsupportedOperationException( "no implementation for " + type );
         }
@@ -185,9 +183,25 @@ public class Jsr305Annotations extends Check {
     public void setAllowOverridingParameter( final boolean allowOverridingParameter ) {
         _allowOverridingParameter = allowOverridingParameter;
     }
+    
+    private final class ClassJsr305Check extends AbstractJsr305Check {
+        
+        public ClassJsr305Check( final DetailAST ast ) {
+            super(ast);
+        }
+
+        @Override
+        protected void runcheck() {
+            checkContainsAny( "@CheckForNull, @Nullable, @Nonnull and @CheckReturnValue are not allowed on class level. Use @ParametersAreNonnullByDefault, @ParametersAreNullableByDefault and @ReturnValuesAreNonnullByDefault.",
+                    NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.CHECK_RETURN_VALUE, NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE );
+            checkContainsAll( "@ParametersAreNullableByDefault and @ParametersAreNonnullByDefault are not allowed together!", NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT,
+                    NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT );
+        }
+        
+    }
 
     private final class ParameterJsr305Check extends AbstractJsr305Check {
-
+        
         ParameterJsr305Check( final DetailAST ast ) {
             super( ast );
         }
@@ -205,28 +219,33 @@ public class Jsr305Annotations extends Check {
                     NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT );
             checkContainsAll( "@Nonnull and @Nullable are not allowed together!", NullnessAnnotation.NONNULL,
                     NullnessAnnotation.NULLABLE );
+            
+            final NullnessAnnotation firstAncestorAnnotation = getParentMethodOrClassAnnotation(NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT, NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT);
+            final boolean parametersAreNonnullByDefault = firstAncestorAnnotation == NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT;
+            final boolean parametersAreNullableByDefault = firstAncestorAnnotation == NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT;
+            final boolean isMethodOverridden = isMethodOverridden();
 
             if ( isPrimitiveType() ) {
                 checkContainsAny( "Primitives must not have any nullness annotations!", NullnessAnnotation.CHECK_FOR_NULL,
                         NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE );
                 return;
             }
-            if ( _overriddenMethod && !_allowOverridingParameter ) {
+            if ( isMethodOverridden && !_allowOverridingParameter ) {
                 checkContainsAny( "It is not allowed to increase nullness constraint for overriden method parameter definitions!",
                         NullnessAnnotation.NONNULL );
             }
-            if ( _parametersAreNonnullByDefault ) {
+            if ( parametersAreNonnullByDefault ) {
                 checkContainsAny(
-                        "It is not necessary to annotate @Nonnull if you annoted the method or class with @ParametersAreNonnullByDefault.",
+                        "It is not necessary to annotate @Nonnull if you annotated the method or class with @ParametersAreNonnullByDefault.",
                         NullnessAnnotation.NONNULL );
             }
-            if ( _parametersAreNullableByDefault ) {
+            if ( parametersAreNullableByDefault ) {
                 checkContainsAny(
                         "It is not necessary to annotate @Nullable if you annoted the method or class with @ParametersAreNullableByDefault.",
                         NullnessAnnotation.NULLABLE );
             }
 
-            if ( !_overriddenMethod && !_parametersAreNonnullByDefault && !_parametersAreNullableByDefault ) {
+            if ( !isMethodOverridden && !parametersAreNonnullByDefault && !parametersAreNullableByDefault ) {
                 checkContainsNone( "No nullness Annotation for parameter definition found!", NullnessAnnotation.NONNULL,
                         NullnessAnnotation.NULLABLE );
             }
@@ -242,16 +261,9 @@ public class Jsr305Annotations extends Check {
 
         @Override
         protected final void runcheck() {
-            _overriddenMethod = containsAny( NullnessAnnotation.OVERRIDE );
-            _parametersAreNonnullByDefault = containsAny( NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT );
-            _parametersAreNullableByDefault = containsAny( NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT );
-
-            if ( _parametersAreNonnullByDefault && _parametersAreNullableByDefault ) {
-                _parametersAreNonnullByDefault = false;
-                _parametersAreNullableByDefault = false;
-            }
             checkContainsAll( "@ParametersAreNonnullByDefault and @ParametersAreNullableByDefault are not allowed together!",
                     NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT, NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT );
+            
             runReturnAnnotationCheck();
         }
 
@@ -267,6 +279,7 @@ public class Jsr305Annotations extends Check {
 
         @Override
         protected void runReturnAnnotationCheck() {
+            
             checkContainsAny( "@ReturnValuesAreNonnullByDefault is not allowed on method return values!",
                     NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT );
             checkContainsAny( "@Nullable is not allowed on method return values!", NullnessAnnotation.NULLABLE );
@@ -274,6 +287,8 @@ public class Jsr305Annotations extends Check {
                     NullnessAnnotation.CHECK_FOR_NULL );
             checkContainsAll( "@CheckReturnValue is not allowed on overriden methods, annotate the interface or superclass!",
                     NullnessAnnotation.CHECK_RETURN_VALUE, NullnessAnnotation.OVERRIDE );
+            checkRedundancyDueToClassLevelAnnotation("Redundant @ParametersAreNonnullByDefault, the class is annotated with the same annotation", NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT);
+            checkRedundancyDueToClassLevelAnnotation("Redundant @ParametersAreNullableByDefault, the class is annotated with the same annotation", NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT);
 
             if ( isVoid() ) {
                 checkContainsAny( "There is nothing to check on void return methods, remove @CheckReturnValue!",
@@ -284,7 +299,11 @@ public class Jsr305Annotations extends Check {
                         NullnessAnnotation.NONNULL, NullnessAnnotation.NULLABLE );
                 return;
             }
-            if ( _returnValuesAreNonnullByDefault ) {
+
+            final boolean returnValuesAreNonnullByDefault = getParentMethodOrClassAnnotation(NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT) == NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT;
+            final boolean isMethodOverridden = isMethodOverridden();
+
+            if ( returnValuesAreNonnullByDefault ) {
                 checkContainsAny(
                         "It is not necessary to annotate @Nonnull if you annoted the class with @ReturnValuesAreNonnullByDefault.",
                         NullnessAnnotation.NONNULL );
@@ -293,12 +312,12 @@ public class Jsr305Annotations extends Check {
                         NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.NONNULL, NullnessAnnotation.OVERRIDE );
             }
 
-            if ( _overriddenMethod && !_allowOverridingReturnValue ) {
+            if ( isMethodOverridden && !_allowOverridingReturnValue ) {
                 checkContainsAny( "Overriden methods allow only @Nonnull.", NullnessAnnotation.CHECK_FOR_NULL,
                         NullnessAnnotation.NULLABLE );
             }
 
-            if ( _overriddenMethod ) {
+            if ( isMethodOverridden ) {
                 checkContainsAny( "You have to inherit parameter annotations!",
                         NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT );
             }
@@ -360,6 +379,19 @@ public class Jsr305Annotations extends Check {
         protected void checkContainsAll( final String msg, final NullnessAnnotation... annotations ) {
             if ( !_errorFound && containsAll( annotations ) ) {
                 error( msg );
+            }
+        }
+        
+        protected void checkRedundancyDueToClassLevelAnnotation( final String msg, final NullnessAnnotation...annotations ){
+            if ( !_errorFound) {
+                for (NullnessAnnotation nullnessAnnotation : annotations) {
+                    boolean thisIsAnnotated = _annotations.contains(nullnessAnnotation);
+                    boolean parentIsAnnotated = getParentMethodOrClassAnnotation(nullnessAnnotation) != null;
+                    if (thisIsAnnotated && parentIsAnnotated) {
+                        error(msg);
+                        return;
+                    }
+                }
             }
         }
 
@@ -437,9 +469,13 @@ public class Jsr305Annotations extends Check {
         }
 
         private Set<NullnessAnnotation> findAnnotation() {
+            return findAnnotation(_ast);
+        }
+        
+        private Set<NullnessAnnotation> findAnnotation( final DetailAST ast ) {
             final Set<NullnessAnnotation> result = new HashSet<NullnessAnnotation>();
 
-            final DetailAST modifiers = _ast.findFirstToken( TokenTypes.MODIFIERS );
+            final DetailAST modifiers = ast.findFirstToken( TokenTypes.MODIFIERS );
             if ( modifiers == null ) {
                 return result;
             }
@@ -462,6 +498,48 @@ public class Jsr305Annotations extends Check {
             }
 
             return result;
+        }
+        
+        protected NullnessAnnotation getParentMethodOrClassAnnotation(
+                final NullnessAnnotation... annotationsToLookFor) {
+            DetailAST current = _ast.getParent();
+            while (current != null) {
+                final int tokenType = current.getType();
+                if (tokenType == TokenTypes.CLASS_DEF || tokenType == TokenTypes.INTERFACE_DEF || tokenType == TokenTypes.METHOD_DEF || tokenType == TokenTypes.CTOR_DEF || tokenType == TokenTypes.ENUM_DEF) {
+                    final Set<NullnessAnnotation> foundAnnotations = findAnnotation(current);
+                    final Set<NullnessAnnotation> foundAndLookedFor = new HashSet<NullnessAnnotation>();
+                    for (NullnessAnnotation nullnessAnnotation : annotationsToLookFor) {
+                        if (foundAnnotations.contains(nullnessAnnotation)) {
+                            foundAndLookedFor.add(nullnessAnnotation);
+                        }
+                    }
+                    if (foundAndLookedFor.size() > 0) {
+                        if (foundAndLookedFor.size() == 1) {
+                            return foundAndLookedFor.iterator().next();
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+                // break on inner and anonymous classes/interfaces, we can't handle inheritance correctly
+                if (tokenType == TokenTypes.LITERAL_NEW || tokenType == TokenTypes.CLASS_DEF || tokenType == TokenTypes.INTERFACE_DEF || tokenType == TokenTypes.ENUM_DEF) {
+                    break;
+                }
+                current = current.getParent();
+            }
+            return null;
+        }
+        
+        protected boolean isMethodOverridden() {
+            DetailAST current = _ast;
+            while (current != null && current.getType() != TokenTypes.METHOD_DEF) {
+                current = current.getParent();
+            }
+            if (current != null) {
+                return findAnnotation(current).contains(NullnessAnnotation.OVERRIDE);
+            } else {
+                return false;
+            }
         }
 
     }
