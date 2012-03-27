@@ -505,7 +505,7 @@ public class Jsr305Annotations extends Check {
             DetailAST current = _ast.getParent();
             while (current != null) {
                 int tokenType = current.getType();
-                if (tokenType == TokenTypes.CLASS_DEF || tokenType == TokenTypes.INTERFACE_DEF || tokenType == TokenTypes.METHOD_DEF || tokenType == TokenTypes.CTOR_DEF) {
+                if (tokenType == TokenTypes.CLASS_DEF || tokenType == TokenTypes.INTERFACE_DEF || tokenType == TokenTypes.METHOD_DEF || tokenType == TokenTypes.CTOR_DEF || tokenType == TokenTypes.ENUM_DEF) {
                     Set<NullnessAnnotation> foundAnnotations = findAnnotation(current);
                     Set<NullnessAnnotation> foundAndLookedFor = new HashSet<NullnessAnnotation>();
                     for (NullnessAnnotation nullnessAnnotation : annotationsToLookFor) {
@@ -522,7 +522,7 @@ public class Jsr305Annotations extends Check {
                     }
                 }
                 // break on inner and anonymous classes/interfaces, we can't handle inheritance correctly
-                if (tokenType == TokenTypes.LITERAL_NEW || tokenType == TokenTypes.CLASS_DEF || tokenType == TokenTypes.INTERFACE_DEF) {
+                if (tokenType == TokenTypes.LITERAL_NEW || tokenType == TokenTypes.CLASS_DEF || tokenType == TokenTypes.INTERFACE_DEF || tokenType == TokenTypes.ENUM_DEF) {
                     break;
                 }
                 current = current.getParent();

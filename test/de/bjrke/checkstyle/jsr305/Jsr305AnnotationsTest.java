@@ -72,7 +72,11 @@ public class Jsr305AnnotationsTest {
 		new ExpectedWarning( ClassLevelReturnValueTestObject.class, 136, 17 ),
 		new ExpectedWarning( ClassLevelReturnValueTestObject.class, 154, 17 ),
 		new ExpectedWarning( ClassLevelReturnValueTestObject.class, 189, 33 ),
-		new ExpectedWarning( ClassLevelReturnValueTestObject.class, 224, 41 )
+		new ExpectedWarning( ClassLevelReturnValueTestObject.class, 224, 41 ),
+		new ExpectedWarning( ClassLevelReturnValueTestObject.class, 244, 48 ),
+		new ExpectedWarning( ClassLevelReturnValueTestObject.class, 252, 39 ),
+		new ExpectedWarning( ClassLevelReturnValueTestObject.class, 266, 17 ),
+		new ExpectedWarning( ClassLevelReturnValueTestObject.class, 272, 17 )
 
         );
     }

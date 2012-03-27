@@ -227,3 +227,59 @@ class InheritanceTest {
 
 	
 }
+
+class EnumTest {
+
+	@ParametersAreNonnullByDefault
+	enum ParameterAnnotationsEnum {
+		TEST;
+		
+		// no error
+		public void setAValue(String foo){}
+		
+		// no error
+		public void setAnotherValue(@Nullable String foo){}
+		
+		// error, redundant
+		public void setYetAnotherValue(@Nonnull String foo){}
+		
+	}
+	
+	enum NoParameterAnnotationsEnum {
+		TEST;
+		
+		// error, missing
+		public void setAValue(String foo){}
+		
+		// no error
+		public void setAnotherValue(@Nonnull String foo){}
+		
+		// no error
+		public void setYetAnotherValue(@Nullable String foo){}
+		
+	}
+	
+	@ReturnValuesAreNonnullByDefault
+	enum ReturnValueAnnotationEnum {
+		TEST;
+		// error, redundant
+		@Nonnull
+		public String getAValue(){
+			return "";
+		}
+
+		// error, disallowed
+		@ReturnValuesAreNonnullByDefault
+		public String getYetAnotherValue(){
+			return "";
+		}
+
+		// no error
+		@CheckForNull
+		public String getAnotherValue(){
+			return "";
+		}
+	}
+
+	
+}
