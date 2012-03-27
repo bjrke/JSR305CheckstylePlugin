@@ -8,7 +8,7 @@ import javax.annotation.ParametersAreNullableByDefault;
 
 import edu.umd.cs.findbugs.annotations.ReturnValuesAreNonnullByDefault;
 
-public class ClassLevelReturnValueTestObject {
+public class ClassTestObject {
 
 	// error, double annotation
 	@ParametersAreNonnullByDefault
@@ -22,26 +22,26 @@ public class ClassLevelReturnValueTestObject {
 	interface ParameterAnnotationsInterface {
 		
 		// no error
-		public void setAValue(String foo);
+		public void setUnannotated(String unannotated);
 		
 		// error, redundant
-		public void setAnotherValue(@Nullable String foo);
+		public void setNullable(@Nullable String nullable);
 		
 		// no error
-		public void setYetAnotherValue(@Nonnull String foopoo);
+		public void setNonnull(@Nonnull String nonnull);
 		
 	}
 	
 	interface NoParameterAnnotationsInterface {
 		
 		// error, missing
-		public void setAValue(String foo);
+		public void setUnannotated(String unannotated);
 		
 		// no error
-		public void setAnotherValue(@Nonnull String foo);
+		public void setNullable(@Nonnull String nullable);
 		
 		// no error
-		public void setYetAnotherValue(@Nullable String foo);
+		public void setNonnull(@Nullable String nonnull);
 		
 	}
 	
@@ -49,26 +49,26 @@ public class ClassLevelReturnValueTestObject {
 	class ParameterAnnotationsClass {
 		
 		// no error
-		public void setAValue(String foo){}
+		public void setUnannotated(String unannotated){}
 		
 		// no error
-		public void setAnotherValue(@Nullable String foo){}
+		public void setNullable(@Nullable String nullable){}
 		
 		// error, redundant
-		public void setYetAnotherValue(@Nonnull String foo){}
+		public void setNonnull(@Nonnull String nonnull){}
 		
 	}
 	
 	class NoParameterAnnotationsClass {
 		
 		// error, missing
-		public void setAValue(String foo){}
+		public void setUnannotated(String unannotated){}
 		
 		// no error
-		public void setAnotherValue(@Nonnull String foo){}
+		public void setNullable(@Nullable String nullable){}
 		
 		// no error
-		public void setYetAnotherValue(@Nullable String foo){}
+		public void setNonnull(@Nonnull String nonnull){}
 		
 	}
 	
@@ -77,70 +77,70 @@ public class ClassLevelReturnValueTestObject {
 		
 		@Override
 		// no error
-		public void setAValue(String foo) {}
+		public void setUnannotated(String unannotated) {}
 
 		@Override
 		// no error
-		public void setAnotherValue(String foo) {}
+		public void setNullable(String nullable) {}
 
 		@Override
 		// no error
-		public void setYetAnotherValue(String foopoo) {}
+		public void setNonnull(String nonnull) {}
 		
 		// no error
-		public void setFoo(String foo){}
+		public void setAnotherUnannotated(String unannotated){}
 	}
 
 	static class NullableParameterInheritingClass implements ParameterAnnotationsInterface {
 		
 		@Override
 		// no error
-		public void setAValue(String foo) {}
+		public void setUnannotated(String unannotated) {}
 
 		@Override
 		// no error
-		public void setAnotherValue(String foo) {}
+		public void setNullable(String nullable) {}
 
 		@Override
 		// no error
-		public void setYetAnotherValue(String foopoo) {}
+		public void setNonnull(String nonnull) {}
 		
 		// error
-		public void setFoo(String foo){}
+		public void setAnotherUnannotated(String unannotated){}
 	}
 	
 	@ReturnValuesAreNonnullByDefault
 	interface ReturnValueAnnotationInterface {
 		// error, redundant
 		@Nonnull
-		public String getAValue();
+		public String getNonnull();
 
 		// error, disallowed
 		@ReturnValuesAreNonnullByDefault
-		public String getYetAnotherValue();
+		public String getNonnullByDefault();
 
 		// no error
 		@CheckForNull
-		public String getAnotherValue();
+		public String getCheckForNull();
 	}
 
 	@ReturnValuesAreNonnullByDefault
 	static class ReturnValueAnnotationClass {
 		// error, redundant
 		@Nonnull
-		public String getAValue() {
+		public String getNonnull() {
 			return "";
 		}
 
 		// error, disallowed
 		@ReturnValuesAreNonnullByDefault
-		public String getYetAnotherValue() {
+		public String getNonnullByDefault() {
 			return "";
 		}
 
 		// no error
 		@CheckForNull
-		public String getAnotherValue() {
+		public String getCheckForNull() {
 			return "";
 		}
 	}
@@ -148,15 +148,15 @@ public class ClassLevelReturnValueTestObject {
 	interface NoReturnValueAnnotationInterface {
 		// no error
 		@Nonnull
-		public String getAValue();
+		public String getNonnull();
 
 		// error, disallowed
 		@ReturnValuesAreNonnullByDefault
-		public String getYetAnotherValue();
+		public String getNonnullByDefault();
 
 		// no error
 		@CheckForNull
-		public String getAnotherValue();
+		public String getCheckForNull();
 	}
 
 }
@@ -165,63 +165,63 @@ public class ClassLevelReturnValueTestObject {
 class InheritanceTest {
 
 	@ParametersAreNonnullByDefault
-	interface Foo {
+	interface Inherited {
 		
 		// no error
-		void foo(String bar);
+		void getUnannotated(String unannotated);
 		
 		// no error
-		void bar(@Nullable String foo);
+		void getNullable(@Nullable String nullable);
 	}
 	
 	// no error
-	static class Fop implements Foo{
+	static class UnannotatedInheritor implements Inherited{
 	
 		// no error, since we're overriding @NonnullByDefault from the interface
 		@Override
-		public void foo(@Nullable String bar) {}
+		public void getUnannotated(@Nullable String unannotated) {}
 
 		// no error
 		@Override
-		public void bar(String foo) {}
+		public void getNullable(String nullable) {}
 		
 		// error
-		public void baz(String foo) {}
+		public void getAnotherUnannotated(String unannotated) {}
 		
 	}
 	
 	// no error
 	@ParametersAreNullableByDefault
-	static class FopToo implements Foo{
+	static class AnnotatedInheritor implements Inherited{
 	
 		// this should not be an error, we are inheriting via the @Override annotation
 		@Override
-		public void foo(String bar) {}
+		public void getUnannotated(String unannotated) {}
 		
 		// no error
 		@Override
-		public void bar(String baz) {}
+		public void getNullable(String nullable) {}
 		
 		// no error
-		public void baz(String foo) {}
+		public void getAnotherUnannotated(String unannotated) {}
 		
 	}
 	
 	// anonymous classes can't be annotated, but this should inherit the annotations from the superclass
 	public void testAnonClasses() {
 		@SuppressWarnings("unused")
-		Foo foo = new Foo() {
+		Inherited anonymousClassInstance = new Inherited() {
 			
 			// no error
 			@Override
-			public void foo(String barrrrrr) {}
+			public void getUnannotated(String unannotated) {}
 
 			// no error
 			@Override
-			public void bar(String foo) {}
+			public void getNullable(String nullable) {}
 			
 			// error
-			public void baz(String foo) {}
+			public void getAnotherUnannotated(String getAnotherUnannotated) {}
 		};
 	}
 
@@ -235,13 +235,13 @@ class EnumTest {
 		TEST;
 		
 		// no error
-		public void setAValue(String foo){}
+		public void setUnannotated(String foo){}
 		
 		// no error
-		public void setAnotherValue(@Nullable String foo){}
+		public void setNullable(@Nullable String foo){}
 		
 		// error, redundant
-		public void setYetAnotherValue(@Nonnull String foo){}
+		public void setNonnull(@Nonnull String foo){}
 		
 	}
 	
@@ -249,13 +249,13 @@ class EnumTest {
 		TEST;
 		
 		// error, missing
-		public void setAValue(String foo){}
+		public void setUnannotated(String foo){}
 		
 		// no error
-		public void setAnotherValue(@Nonnull String foo){}
+		public void setNullable(@Nullable String foo){}
 		
 		// no error
-		public void setYetAnotherValue(@Nullable String foo){}
+		public void setNonnull(@Nonnull String foo){}
 		
 	}
 	
@@ -264,19 +264,19 @@ class EnumTest {
 		TEST;
 		// error, redundant
 		@Nonnull
-		public String getAValue(){
+		public String getNonnull(){
 			return "";
 		}
 
 		// error, disallowed
 		@ReturnValuesAreNonnullByDefault
-		public String getYetAnotherValue(){
+		public String getNonnnullByDefault(){
 			return "";
 		}
 
 		// no error
 		@CheckForNull
-		public String getAnotherValue(){
+		public String getCheckForNull(){
 			return "";
 		}
 	}

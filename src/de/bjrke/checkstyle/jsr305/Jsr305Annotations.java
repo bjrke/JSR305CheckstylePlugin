@@ -220,7 +220,7 @@ public class Jsr305Annotations extends Check {
             checkContainsAll( "@Nonnull and @Nullable are not allowed together!", NullnessAnnotation.NONNULL,
                     NullnessAnnotation.NULLABLE );
             
-            NullnessAnnotation firstAncestorAnnotation = getParentMethodOrClassAnnotation(NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT, NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT);
+            final NullnessAnnotation firstAncestorAnnotation = getParentMethodOrClassAnnotation(NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT, NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT);
             final boolean parametersAreNonnullByDefault = firstAncestorAnnotation == NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT;
             final boolean parametersAreNullableByDefault = firstAncestorAnnotation == NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT;
             final boolean isMethodOverridden = isMethodOverridden();
@@ -288,7 +288,7 @@ public class Jsr305Annotations extends Check {
             checkContainsAll( "@CheckReturnValue is not allowed on overriden methods, annotate the interface or superclass!",
                     NullnessAnnotation.CHECK_RETURN_VALUE, NullnessAnnotation.OVERRIDE );
             checkRedundancyDueToClassLevelAnnotation("Redundant @ParametersAreNonnullByDefault, the class is annotated with the same annotation", NullnessAnnotation.PARAMETERS_ARE_NONNULL_BY_DEFAULT);
-            checkRedundancyDueToClassLevelAnnotation("Redundant @ParametersAreNullableByDefault, an ancestor is annotated with the same annotation", NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT);
+            checkRedundancyDueToClassLevelAnnotation("Redundant @ParametersAreNullableByDefault, the class is annotated with the same annotation", NullnessAnnotation.PARAMETERS_ARE_NULLABLE_BY_DEFAULT);
 
             if ( isVoid() ) {
                 checkContainsAny( "There is nothing to check on void return methods, remove @CheckReturnValue!",
@@ -385,11 +385,11 @@ public class Jsr305Annotations extends Check {
         protected void checkRedundancyDueToClassLevelAnnotation( final String msg, final NullnessAnnotation...annotations ){
             if ( !_errorFound) {
                 for (NullnessAnnotation nullnessAnnotation : annotations) {
-                    if (_annotations.contains(nullnessAnnotation)) {
-                        if (getParentMethodOrClassAnnotation(nullnessAnnotation) != null) {
-                            error(msg);
-                            return;
-                        }
+                    boolean thisIsAnnotated = _annotations.contains(nullnessAnnotation);
+                    boolean parentIsAnnotated = getParentMethodOrClassAnnotation(nullnessAnnotation) != null;
+                    if (thisIsAnnotated && parentIsAnnotated) {
+                        error(msg);
+                        return;
                     }
                 }
             }
@@ -501,13 +501,13 @@ public class Jsr305Annotations extends Check {
         }
         
         protected NullnessAnnotation getParentMethodOrClassAnnotation(
-                NullnessAnnotation... annotationsToLookFor) {
+                final NullnessAnnotation... annotationsToLookFor) {
             DetailAST current = _ast.getParent();
             while (current != null) {
-                int tokenType = current.getType();
+                final int tokenType = current.getType();
                 if (tokenType == TokenTypes.CLASS_DEF || tokenType == TokenTypes.INTERFACE_DEF || tokenType == TokenTypes.METHOD_DEF || tokenType == TokenTypes.CTOR_DEF || tokenType == TokenTypes.ENUM_DEF) {
-                    Set<NullnessAnnotation> foundAnnotations = findAnnotation(current);
-                    Set<NullnessAnnotation> foundAndLookedFor = new HashSet<NullnessAnnotation>();
+                    final Set<NullnessAnnotation> foundAnnotations = findAnnotation(current);
+                    final Set<NullnessAnnotation> foundAndLookedFor = new HashSet<NullnessAnnotation>();
                     for (NullnessAnnotation nullnessAnnotation : annotationsToLookFor) {
                         if (foundAnnotations.contains(nullnessAnnotation)) {
                             foundAndLookedFor.add(nullnessAnnotation);
