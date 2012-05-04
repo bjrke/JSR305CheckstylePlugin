@@ -49,15 +49,15 @@ public class ClassTestObject {
     class ParameterAnnotationsClass {
 
         // no error
-        public void setUnannotated( final String unannotated ) {
+        public void setUnannotated( @SuppressWarnings("unused") final String unannotated ) {
         }
 
         // no error
-        public void setNullable( @Nullable final String nullable ) {
+        public void setNullable( @SuppressWarnings("unused") @Nullable final String nullable ) {
         }
 
         // error, redundant
-        public void setNonnull( @Nonnull final String nonnull ) {
+        public void setNonnull( @SuppressWarnings("unused") @Nonnull final String nonnull ) {
         }
 
     }
@@ -65,15 +65,15 @@ public class ClassTestObject {
     class NoParameterAnnotationsClass {
 
         // error, missing
-        public void setUnannotated( final String unannotated ) {
+        public void setUnannotated( @SuppressWarnings("unused") final String unannotated ) {
         }
 
         // no error
-        public void setNullable( @Nullable final String nullable ) {
+        public void setNullable( @SuppressWarnings("unused") @Nullable final String nullable ) {
         }
 
         // no error
-        public void setNonnull( @Nonnull final String nonnull ) {
+        public void setNonnull( @SuppressWarnings("unused") @Nonnull final String nonnull ) {
         }
 
     }
@@ -97,7 +97,7 @@ public class ClassTestObject {
         }
 
         // no error
-        public void setAnotherUnannotated( final String unannotated ) {
+        public void setAnotherUnannotated( @SuppressWarnings("unused") final String unannotated ) {
         }
     }
 
@@ -119,7 +119,7 @@ public class ClassTestObject {
         }
 
         // error
-        public void setAnotherUnannotated( final String unannotated ) {
+        public void setAnotherUnannotated( @SuppressWarnings("unused") final String unannotated ) {
         }
     }
 
@@ -202,7 +202,7 @@ class InheritanceTest {
         }
 
         // error
-        public void getAnotherUnannotated( final String unannotated ) {
+        public void getAnotherUnannotated( @SuppressWarnings("unused") final String unannotated ) {
         }
 
     }
@@ -223,7 +223,7 @@ class InheritanceTest {
         }
 
         // no error
-        public void getAnotherUnannotated( final String unannotated ) {
+        public void getAnotherUnannotated( @SuppressWarnings("unused") final String unannotated ) {
         }
 
     }
@@ -259,15 +259,15 @@ class EnumTest {
         TEST;
 
         // no error
-        public void setUnannotated( final String foo ) {
+        public void setUnannotated( @SuppressWarnings("unused") final String foo ) {
         }
 
         // no error
-        public void setNullable( @Nullable final String foo ) {
+        public void setNullable( @SuppressWarnings("unused") @Nullable final String foo ) {
         }
 
         // error, redundant
-        public void setNonnull( @Nonnull final String foo ) {
+        public void setNonnull( @SuppressWarnings("unused") @Nonnull final String foo ) {
         }
 
     }
@@ -276,15 +276,15 @@ class EnumTest {
         TEST;
 
         // error, missing
-        public void setUnannotated( final String foo ) {
+        public void setUnannotated( @SuppressWarnings("unused") final String foo ) {
         }
 
         // no error
-        public void setNullable( @Nullable final String foo ) {
+        public void setNullable( @SuppressWarnings("unused") @Nullable final String foo ) {
         }
 
         // no error
-        public void setNonnull( @Nonnull final String foo ) {
+        public void setNonnull( @SuppressWarnings("unused") @Nonnull final String foo ) {
         }
 
     }
