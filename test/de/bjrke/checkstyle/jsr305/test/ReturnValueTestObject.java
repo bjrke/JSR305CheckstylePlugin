@@ -31,7 +31,7 @@ public class ReturnValueTestObject implements Comparable<ReturnValueTestObject>,
         return null;
     }
 
-    //error
+    // error
     @Nonnull
     @CheckForNull
     Object returnNonnullCheckForNull() {
@@ -45,41 +45,41 @@ public class ReturnValueTestObject implements Comparable<ReturnValueTestObject>,
         return new Object();
     }
 
-    //ok
+    // ok
     @CheckReturnValue
     @Nonnull
     Object returnCheckReturnValueNonnull() {
         return new Object();
     }
 
-    //error
+    // error
     @Override
     @Nonnull
     public boolean equals( final Object obj ) {
         return super.equals( obj );
     }
 
-    //error
+    // error
     @Override
     @CheckForNull
     public int hashCode() {
         return super.hashCode();
     }
 
-    //ok
+    // ok
     @Override
     public void run() {
         hashCode();
     }
 
-    //ok
+    // ok
     @Override
     @Nonnull
     public String toString() {
         return super.toString();
     }
 
-    //error + 2x parameter error
+    // error + 2x parameter error
     @ParametersAreNonnullByDefault
     @ParametersAreNullableByDefault
     @Nonnull

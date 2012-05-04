@@ -17,12 +17,6 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-/**
- * {@link ArraysTestObject}.
- * 
- * @author <a href="mailto:Jan Burkhardt<jan.burkhardt@freiheit.com">Jan
- *         Burkhardt</a> (initial creation)
- */
 public class ArraysTestObject {
 
     private final Object _obj;
@@ -89,7 +83,7 @@ public class ArraysTestObject {
 
     @Nonnull
     int[] retNonnul() {
-        return new int[] { };
+        return new int[] {};
     }
 
     @CheckForNull
@@ -98,7 +92,7 @@ public class ArraysTestObject {
     }
 
     int[] retNoAnnotation() {
-        return new int[] { };
+        return new int[] {};
     }
 
     // ok

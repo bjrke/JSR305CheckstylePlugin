@@ -69,7 +69,7 @@ public class ParameterTestObject implements Comparable<ParameterTestObject>, Ser
         return 0;
     }
 
-    //error
+    // error
     @Nonnull
     public String nonnullNullable( @Nonnull @Nullable final Object o ) {
         return String.valueOf( o );

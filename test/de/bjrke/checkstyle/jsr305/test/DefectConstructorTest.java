@@ -13,12 +13,6 @@ package de.bjrke.checkstyle.jsr305.test;
 
 import javax.annotation.Nonnull;
 
-/**
- * {@link DefectConstructorTest}.
- * 
- * @author <a href="mailto:Jan Burkhardt<jan.burkhardt@freiheit.com">Jan
- *         Burkhardt</a> (initial creation)
- */
 public class DefectConstructorTest {
 
     private final String _s;
