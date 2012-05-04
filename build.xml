@@ -5,8 +5,8 @@
         <format property="TIMESTAMP" pattern="yyyyMMdd-HHmm" />
     </tstamp>
 
-    <!--property name="version" value="0.4.0.SNAPSHOT_${TIMESTAMP}" /-->
-    <property name="version" value="0.4.0" />
+    <!--property name="version" value="0.4.1.SNAPSHOT_${TIMESTAMP}" /-->
+    <property name="version" value="0.4.1" />
     <property name="src" value="src" />
     <property name="build" value="build" />
     <property name="classes" value="${build}/classes" />
