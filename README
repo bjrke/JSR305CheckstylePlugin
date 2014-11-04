@@ -1,3 +1,5 @@
+WARNING: The Plugin is incompatible with checkstyle-5.9, please use an older version
+
 to develop just import project to eclipse with default settings
 
 to build the jar type
