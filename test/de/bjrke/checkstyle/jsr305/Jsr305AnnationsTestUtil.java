@@ -134,7 +134,7 @@ public class Jsr305AnnationsTestUtil {
 
             final String path = filename.replace( resolveName( clz, ".class" ), "" );
             final int lastSlash = path.lastIndexOf( "/", path.length() - 2 );
-            final String newPath = path.substring( 0, lastSlash ) + "/test/" + resolveName( clz, ".java" );
+            final String newPath = path.substring( 0, lastSlash ) + "/../test/" + resolveName( clz, ".java" );
             return new File( new URI( newPath ) );
         } catch ( final URISyntaxException e ) {
             throw new RuntimeException( e );
