@@ -89,14 +89,16 @@ public class Jsr305AnnationsTestUtil {
             Assert.assertTrue( _warningIterator.hasNext(), "There should be an expeceted warning for file \"" + event.getFileName()
                     + "\", but none found" );
             final ExpectedWarning warning = _warningIterator.next();
-            final String error = "Position (" + event.getLine() + ":" + event.getColumn() + ") didn't match: " + warning;
+            final String error =
+                    "Position (" + event.getLine() + ":" + event.getColumn() + ") didn't match: " + warning + "event: "
+                            + event.getMessage();
             Assert.assertEquals( event.getLine(), warning._line, error );
             Assert.assertEquals( event.getColumn(), warning._column, error );
         }
 
     }
 
-    public static void check( final ExpectedWarning... warnings ) {
+    public static void check( final ExpectedWarning... warnings ) throws CheckstyleException {
         final Checker checker = createChecker();
 
         checker.addListener( new DefaultLogger( System.out, false ) );
@@ -134,7 +136,7 @@ public class Jsr305AnnationsTestUtil {
 
             final String path = filename.replace( resolveName( clz, ".class" ), "" );
             final int lastSlash = path.lastIndexOf( "/", path.length() - 2 );
-            final String newPath = path.substring( 0, lastSlash ) + "/../test/" + resolveName( clz, ".java" );
+            final String newPath = path.substring( 0, lastSlash ) + "/test/" + resolveName( clz, ".java" );
             return new File( new URI( newPath ) );
         } catch ( final URISyntaxException e ) {
             throw new RuntimeException( e );

@@ -29,12 +29,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import antlr.collections.AST;
-
 import com.puppycrawl.tools.checkstyle.api.Check;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FullIdent;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
+
+import antlr.collections.AST;
 
 public class Jsr305Annotations extends Check {
 
@@ -310,8 +310,9 @@ public class Jsr305Annotations extends Check {
                         "It is not necessary to annotate @Nonnull if you annoted the class with @ReturnValuesAreNonnullByDefault.",
                         NullnessAnnotation.NONNULL );
             } else {
-                checkContainsNone( "Returnvalue must have nullness Annotation (@Nonnull or @CheckForNull)!",
-                        NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.NONNULL, NullnessAnnotation.OVERRIDE );
+                checkContainsNone(
+                        "Returnvalue must have nullness Annotation (@Nonnull or @CheckForNull)!", NullnessAnnotation.CHECK_FOR_NULL,
+                        NullnessAnnotation.NONNULL, NullnessAnnotation.OVERRIDE );
             }
 
             if ( isMethodOverridden && !_allowOverridingReturnValue ) {
