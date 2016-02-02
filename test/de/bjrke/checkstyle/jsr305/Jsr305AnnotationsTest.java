@@ -14,7 +14,7 @@ import de.bjrke.checkstyle.jsr305.test.ReturnValueTestObject;
 public class Jsr305AnnotationsTest {
 
     @Test
-    public void test() {
+    public void test() throws Exception {
         Jsr305AnnationsTestUtil.check( //
                 new ExpectedWarning( ParameterTestObject.class, 15, 45 ), //
                 new ExpectedWarning( ParameterTestObject.class, 20, 46 ), //

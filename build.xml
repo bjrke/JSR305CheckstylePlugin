@@ -6,7 +6,7 @@
     </tstamp>
 
     <!-- property name="version" value="0.4.2.SNAPSHOT_${TIMESTAMP}" / -->
-    <property name="version" value="0.4.2" />
+    <property name="version" value="0.4.3" />
     <property name="src" value="src" />
     <property name="build" value="build" />
     <property name="classes" value="${build}/classes" />
@@ -15,7 +15,7 @@
     <property name="lib.home" value="lib" />
 
     <fileset dir="${lib.home}" id="libs">
-        <include name="checkstyle-5.9-all.jar" />
+        <include name="checkstyle-6.14.1-all.jar" />
     </fileset>
 
     <fileset id="checkstyle_metadata" dir="${src}">
@@ -31,7 +31,7 @@
     </target>
 
     <target name="compile" depends="prepare" description="compile it">
-        <javac srcdir="${src}" source="1.5" target="1.5" destdir="${classes}" debug="on">
+        <javac srcdir="${src}" source="1.8" target="1.8" destdir="${classes}" debug="on">
             <compilerarg value="-Xlint:all"/>
             <classpath>
                 <fileset refid="libs"/>
@@ -74,7 +74,7 @@
 
     <taskdef resource="checkstyletask.properties">
         <classpath>
-            <pathelement path="${lib.home}/checkstyle-5.9-all.jar" />
+            <pathelement path="${lib.home}/checkstyle-6.14.1-all.jar" />
             <pathelement path="${classes}" />
         </classpath>
     </taskdef>
