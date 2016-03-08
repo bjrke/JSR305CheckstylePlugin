@@ -305,10 +305,12 @@ public class Jsr305Annotations extends Check {
             final boolean returnValuesAreNonnullByDefault = getParentMethodOrClassAnnotation( NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT ) == NullnessAnnotation.RETURN_VALUES_ARE_NONNULL_BY_DEFAULT;
             final boolean isMethodOverridden = isMethodOverridden();
 
-            if ( returnValuesAreNonnullByDefault ) {
-                checkContainsAny(
-                        "It is not necessary to annotate @Nonnull if you annoted the class with @ReturnValuesAreNonnullByDefault.",
-                        NullnessAnnotation.NONNULL );
+            if (returnValuesAreNonnullByDefault) {
+                if (!isMethodOverridden) {
+                    checkContainsAny(
+                            "It is not necessary to annotate @Nonnull if you annoted the class with @ReturnValuesAreNonnullByDefault.",
+                            NullnessAnnotation.NONNULL);
+                }
             } else {
                 checkContainsNone( "Returnvalue must have nullness Annotation (@Nonnull or @CheckForNull)!",
                         NullnessAnnotation.CHECK_FOR_NULL, NullnessAnnotation.NONNULL, NullnessAnnotation.OVERRIDE );
