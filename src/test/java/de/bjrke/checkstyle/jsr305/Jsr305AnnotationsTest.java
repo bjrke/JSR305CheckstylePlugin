@@ -8,6 +8,7 @@ import de.bjrke.checkstyle.jsr305.Jsr305AnnationsTestUtil.ExpectedWarning;
 import de.bjrke.checkstyle.jsr305.test.ArraysTestObject;
 import de.bjrke.checkstyle.jsr305.test.ClassTestObject;
 import de.bjrke.checkstyle.jsr305.test.ConstructorTestObject;
+import de.bjrke.checkstyle.jsr305.test.DefaultParameterTestObject;
 import de.bjrke.checkstyle.jsr305.test.DefectConstructorTest;
 import de.bjrke.checkstyle.jsr305.test.ParameterTestObject;
 import de.bjrke.checkstyle.jsr305.test.PrimitivesTestObject;
@@ -77,7 +78,9 @@ public class Jsr305AnnotationsTest {
                 new ExpectedWarning( ClassTestObject.class, 279, 37 ), //
                 new ExpectedWarning( ClassTestObject.class, 296, 9 ), //
                 new ExpectedWarning( ClassTestObject.class, 302, 9 ), //
-                new ExpectedWarning( ClassTestObject.class, 315, 5 ) //
+                new ExpectedWarning( ClassTestObject.class, 315, 5 ), //
+
+                new ExpectedWarning(DefaultParameterTestObject.class, 18, 5) //
                 );
     }
 }
