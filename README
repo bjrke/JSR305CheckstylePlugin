@@ -1,7 +1,8 @@
-to develop just import project to eclipse with default settings
+to develop import project to eclipse with default settings after typing
+    ./gradlew eclipse
 
 to build the jar type
-    ant
+    ./gradlew jar
 
 to use copy JSR305Checkstyle-x.x.x.jar into your eclipse dropins directory or add it as compile lib to the classpath of the checkstyle task.
 

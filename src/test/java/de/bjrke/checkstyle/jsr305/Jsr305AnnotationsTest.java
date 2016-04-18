@@ -2,6 +2,8 @@ package de.bjrke.checkstyle.jsr305;
 
 import org.testng.annotations.Test;
 
+import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
+
 import de.bjrke.checkstyle.jsr305.Jsr305AnnationsTestUtil.ExpectedWarning;
 import de.bjrke.checkstyle.jsr305.test.ArraysTestObject;
 import de.bjrke.checkstyle.jsr305.test.ClassTestObject;
@@ -14,7 +16,7 @@ import de.bjrke.checkstyle.jsr305.test.ReturnValueTestObject;
 public class Jsr305AnnotationsTest {
 
     @Test
-    public void test() {
+    public void test() throws CheckstyleException {
         Jsr305AnnationsTestUtil.check( //
                 new ExpectedWarning( ParameterTestObject.class, 15, 45 ), //
                 new ExpectedWarning( ParameterTestObject.class, 20, 46 ), //

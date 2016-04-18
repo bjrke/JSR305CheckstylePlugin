@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="JSR305CheckstylePlugin" url="http://cloud.github.com/downloads/bjrke/JSR305CheckstylePlugin">
+      a plugin which ensures nullness annotations on methods and constructors
+   </description>
+   <feature url="features/JSR305CheckstylePlugin-${VERSION}.jar" id="JSR305CheckstylePlugin" version="${VERSION}">
+      <category name="JSR305Checkstyle"/>
+   </feature>
+   <archive path="JSR305CheckstylePlugin-${VERSION}.jar" url="https://github.com/bjrke/JSR305CheckstylePlugin/releases/download/${VERSION}/JSR305CheckstylePlugin-${VERSION}.jar" />
+   <category-def name="JSR305Checkstyle" label="JSR305Checkstyle">
+      <description>
+         a plugin which ensures nullness annotations on methods and constructors
+      </description>
+   </category-def>
+</site>

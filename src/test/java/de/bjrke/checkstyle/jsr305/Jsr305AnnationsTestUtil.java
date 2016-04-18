@@ -21,6 +21,8 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 
 public class Jsr305AnnationsTestUtil {
 
+    private static final String GRADLE_BUILD_PATH = "/build/classes";
+
     public static final class ExpectedWarning {
 
         private final int _column;
@@ -96,7 +98,7 @@ public class Jsr305AnnationsTestUtil {
 
     }
 
-    public static void check( final ExpectedWarning... warnings ) {
+    public static void check( final ExpectedWarning... warnings ) throws CheckstyleException {
         final Checker checker = createChecker();
 
         checker.addListener( new DefaultLogger( System.out, false ) );
@@ -132,9 +134,12 @@ public class Jsr305AnnationsTestUtil {
             final URL url = clz.getResource( clzFilename );
             final String filename = url.toString();
 
-            final String path = filename.replace( resolveName( clz, ".class" ), "" );
-            final int lastSlash = path.lastIndexOf( "/", path.length() - 2 );
-            final String newPath = path.substring( 0, lastSlash ) + "/../test/" + resolveName( clz, ".java" );
+            final String path = filename.replace(resolveName(clz, ".class"), "");
+            final int lastSlash = path.lastIndexOf("/", path.length() - 2);
+            final String lsPath = path.substring(0, lastSlash);
+            final String buildPath = lsPath.endsWith(GRADLE_BUILD_PATH) ? lsPath.substring(0, lsPath.length() - GRADLE_BUILD_PATH.length()) : lsPath;
+
+            final String newPath = buildPath + "/src/test/java/" + resolveName(clz, ".java");
             return new File( new URI( newPath ) );
         } catch ( final URISyntaxException e ) {
             throw new RuntimeException( e );
