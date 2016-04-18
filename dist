@@ -1,0 +1,6 @@
+#!/bin/sh
+RANDOM_TAG=jsr305_plugin_dist_$(tr -dc "a-z" < /dev/urandom | head -c 8)
+
+docker build -t $RANDOM_TAG .
+docker run --rm -v $PWD:/dist $RANDOM_TAG sh -c "./gradlew clean jar"
+docker rmi --no-prune=true $RANDOM_TAG
