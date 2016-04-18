@@ -161,15 +161,11 @@ public class Jsr305AnnationsTestUtil {
         return name;
     }
 
-    private static Checker createChecker() {
-        try {
-            final Checker checker = new Checker();
-            checker.setModuleClassLoader( Checker.class.getClassLoader() );
-            checker.configure( createCheckerConfiguration() );
-            return checker;
-        } catch ( final CheckstyleException e ) {
-            throw new RuntimeException( e );
-        }
+    private static Checker createChecker() throws CheckstyleException {
+        final Checker checker = new Checker();
+        checker.setModuleClassLoader( Checker.class.getClassLoader() );
+        checker.configure( createCheckerConfiguration() );
+        return checker;
     }
 
     private static DefaultConfiguration createCheckerConfiguration() {

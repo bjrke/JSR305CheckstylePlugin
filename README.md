@@ -7,6 +7,9 @@ Requirements
 ============
 
 JDK 7+
+checkstyle 6.2+
+
+Notice: checkstyle 6.14 and 6.16 are known as broken, use 6.14.1, 6.16.1 or any new version
 
 Usage
 =====
@@ -34,4 +37,3 @@ to develop import project to eclipse with default settings after typing
 to build the jar type
 
     ./gradlew jar
-
