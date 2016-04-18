@@ -6,15 +6,13 @@ A checkstyle plugin which ensures nullness annotations on methods and constructo
 Requirements
 ============
 
-JDK 7+
-checkstyle 6.2+
-
-Notice: checkstyle 6.14 and 6.16 are known as broken, use 6.14.1, 6.16.1 or any new version
+* JDK 7+
+* checkstyle 6.2+ (6.14 and 6.16 are known as broken, use 6.14.1, 6.16.1 instead)
 
 Usage
 =====
 
-To use copy JSR305Checkstyle-x.x.x.jar into your eclipse dropins directory or add it as compile lib to the classpath of the checkstyle task.
+Copy JSR305Checkstyle-x.x.x.jar into your eclipse dropins directory or add it to the classpath of your checkstyle task.
 
 Add this to your checkstyle.xml:
 
@@ -30,10 +28,10 @@ Development
 
 It is a gradle project with included gradle wrapper.
 
-to develop import project to eclipse with default settings after typing
+To develop, import project to eclipse with default settings after typing:
 
     ./gradlew eclipse
 
-to build the jar type
+To build the jar type:
 
     ./gradlew jar
