@@ -1,7 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-version = "0.4.2.SNAPSHOT_${new Date().format("yyyyMMdd-HHmm")}";
+version = '0.4.3';
+// version = "0.4.3.SNAPSHOT_${new Date().format("yyyyMMdd-HHmm")}";
 
 test {
   useTestNG()
@@ -30,6 +31,7 @@ processResources {
 
 jar {
     version = project.version
+    baseName = 'JSR305CheckstylePlugin'
     manifest {
         attributes(
             'Bundle-Name': 'JSR305CheckstylePlugin',
@@ -64,4 +66,3 @@ jar {
 
     test.dependsOn(tasks[testname])
 }
-
