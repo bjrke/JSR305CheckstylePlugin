@@ -535,13 +535,17 @@ public class Jsr305Annotations extends Check {
 
         protected boolean isMethodOverridden() {
             DetailAST current = _ast;
-            while ( current != null && current.getType() != TokenTypes.METHOD_DEF ) {
-                current = current.getParent();
+            while ( current != null ) {
+                switch ( current.getType() ) {
+                    case TokenTypes.METHOD_DEF:
+                        return findAnnotation( current ).contains( NullnessAnnotation.OVERRIDE );
+                    case TokenTypes.LAMBDA:
+                        return true;
+                    default:
+                        current = current.getParent();
+                }
             }
-            if ( current == null ) {
-                return false;
-            }
-            return findAnnotation( current ).contains( NullnessAnnotation.OVERRIDE );
+            return false;
         }
 
     }
