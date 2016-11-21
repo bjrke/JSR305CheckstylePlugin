@@ -4,8 +4,8 @@ apply plugin: 'eclipse'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-//version = '0.4.3';
-version = "0.4.3.SNAPSHOT_${new Date().format("yyyyMMdd-HHmm")}";
+version = '0.5.0';
+//version = "0.5.0.SNAPSHOT_${new Date().format("yyyyMMdd-HHmm")}";
 
 test {
   useTestNG()
