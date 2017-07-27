@@ -6,3 +6,6 @@ bin
 build
 *.orig
 test-output
+.idea
+*.iml
+
