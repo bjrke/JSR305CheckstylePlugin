@@ -4,8 +4,12 @@ apply plugin: 'eclipse'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-//version = '0.5.1';
-version = "0.5.1.SNAPSHOT_${new Date().format("yyyyMMdd-HHmm")}";
+def stdout = new ByteArrayOutputStream()
+exec {
+    commandLine 'git', 'describe', '--dirty'
+    standardOutput = stdout
+}
+version = stdout.toString().trim()
 
 test {
   useTestNG()

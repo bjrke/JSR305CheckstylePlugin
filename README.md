@@ -7,7 +7,7 @@ Requirements
 ============
 
 * JDK 7+
-* checkstyle >6.16.1
+* checkstyle 6.16.1+
 
 Usage
 =====
