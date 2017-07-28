@@ -31,12 +31,12 @@ import java.util.Set;
 
 import antlr.collections.AST;
 
-import com.puppycrawl.tools.checkstyle.api.Check;
+import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FullIdent;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
-public class Jsr305Annotations extends Check {
+public class Jsr305Annotations extends AbstractCheck {
 
     // TODO check correct imports
     // TODO I18n
@@ -106,6 +106,16 @@ public class Jsr305Annotations extends Check {
 
     @Override
     public int[] getDefaultTokens() {
+        return DEFAULT_MODIFIERS.clone();
+    }
+
+    @Override
+    public int[] getRequiredTokens() {
+        return new int[0];
+    }
+
+    @Override
+    public int[] getAcceptableTokens() {
         return DEFAULT_MODIFIERS.clone();
     }
 
