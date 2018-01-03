@@ -36,7 +36,7 @@ import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FullIdent;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
-public class Jsr305Annotations extends AbstractCheck {
+public class Jsr305AnnotationsCheck extends AbstractCheck {
 
     // TODO check correct imports
     // TODO I18n

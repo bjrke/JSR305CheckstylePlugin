@@ -15,7 +15,7 @@ import de.bjrke.checkstyle.jsr305.test.ParameterTestObject;
 import de.bjrke.checkstyle.jsr305.test.PrimitivesTestObject;
 import de.bjrke.checkstyle.jsr305.test.ReturnValueTestObject;
 
-public class Jsr305AnnotationsTest {
+public class Jsr305AnnotationsCheckTest {
 
     @Test
     public void test() throws CheckstyleException {
