@@ -1,5 +1,5 @@
-JSR 305 Checkstyle Plugin [![Build Status](https://travis-ci.org/bjrke/JSR305CheckstylePlugin.svg?branch=master)](https://travis-ci.org/bjrke/JSR305CheckstylePlugin)
-=====================================================================================================================================================================
+JSR 305 Checkstyle Plugin [![Build Status](https://travis-ci.org/bjrke/JSR305CheckstylePlugin.svg?branch=master)](https://travis-ci.org/bjrke/JSR305CheckstylePlugin) [![License: LGPL v2.1+](https://img.shields.io/badge/License-LGPL%20v2.1+-blue.svg)](https://www.gnu.org/licenses/lgpl-2.1)
+=================================================================================================================================================================================================================================================================================================
 
 A checkstyle plugin which ensures nullness annotations on methods and constructors.
 
@@ -62,3 +62,9 @@ This project uses an annotated git tag to get the version number. To release you
 - upload the result to
 
   https://github.com/bjrke/JSR305CheckstylePlugin/releases
+
+License
+=======
+
+This plugin was original licensed under GPL but is now relicensed under LGPL v2.1 or above.
+See [LICENSE](LICENSE)
