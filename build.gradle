@@ -1,15 +1,12 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
-def stdout = new ByteArrayOutputStream()
-exec {
-    commandLine 'git', 'describe', '--dirty'
-    standardOutput = stdout
-}
-version = stdout.toString().trim()
+group 'de.bjrke.checkstyle'
+version '0.5.2-SNAPSHOT'
 
 test {
   useTestNG()
@@ -77,4 +74,23 @@ jar {
     }
 
     test.dependsOn(tasks[testname])
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url = version.endsWith('SNAPSHOT') ? 'url_to_snapshot_repository' : 'url_to_release_repository'
+            // Supply the credentials using the command line, e.g. "./gradlew publishToMavenLocal -PrepositoryUser='username'"
+            credentials {
+                username repositoryUser
+                password repositoryPassword
+            }
+        }
+    }
 }
